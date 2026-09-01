@@ -1,0 +1,19 @@
+{
+  "name": "honor-counter-analyzer",
+  "version": "1.0.0",
+  "private": true,
+  "description": "王者对局分析 Agent（Honor Counter Analyzer）— 全栈 Agent Web 应用",
+  "scripts": {
+    "dev": "concurrently -n server,web -c blue,green \"npm run dev -w server\" \"npm run dev -w web\"",
+    "dev:server": "npm run dev -w server",
+    "dev:web": "npm run dev -w web",
+    "install:all": "npm install && npm install -w server && npm install -w web"
+  },
+  "workspaces": [
+    "server",
+    "web"
+  ],
+  "devDependencies": {
+    "concurrently": "^9.1.0"
+  }
+}

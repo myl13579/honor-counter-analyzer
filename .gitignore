@@ -1,0 +1,16 @@
+node_modules/
+dist/
+data/uploads/*
+!data/uploads/.gitkeep
+data/db.json
+data/sessions.db
+data/sessions.db-*
+*.log
+.env
+.env.local
+
+# vite 临时文件
+*.timestamp-*.mjs
+
+# vite 临时文件
+*.timestamp-*.mjs

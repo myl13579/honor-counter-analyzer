@@ -1,0 +1,926 @@
+[
+  {
+    "ename": 107,
+    "name": "赵云",
+    "title": "苍天翔龙",
+    "hero_type": 1,
+    "type_name": "战士"
+  },
+  {
+    "ename": 117,
+    "name": "钟无艳",
+    "title": "野蛮之锤",
+    "hero_type": 1,
+    "type_name": "战士"
+  },
+  {
+    "ename": 123,
+    "name": "吕布",
+    "title": "无双之魔",
+    "hero_type": 1,
+    "type_name": "战士"
+  },
+  {
+    "ename": 128,
+    "name": "曹操",
+    "title": "鲜血枭雄",
+    "hero_type": 1,
+    "type_name": "战士"
+  },
+  {
+    "ename": 129,
+    "name": "典韦",
+    "title": "狂战士",
+    "hero_type": 1,
+    "type_name": "战士"
+  },
+  {
+    "ename": 130,
+    "name": "宫本武藏",
+    "title": "剑圣",
+    "hero_type": 1,
+    "type_name": "战士"
+  },
+  {
+    "ename": 134,
+    "name": "达摩",
+    "title": "拳僧",
+    "hero_type": 1,
+    "type_name": "战士"
+  },
+  {
+    "ename": 139,
+    "name": "老夫子",
+    "title": "万古长明",
+    "hero_type": 1,
+    "type_name": "战士"
+  },
+  {
+    "ename": 140,
+    "name": "关羽",
+    "title": "一骑当千",
+    "hero_type": 1,
+    "type_name": "战士"
+  },
+  {
+    "ename": 154,
+    "name": "花木兰",
+    "title": "传说之刃",
+    "hero_type": 1,
+    "type_name": "战士"
+  },
+  {
+    "ename": 166,
+    "name": "亚瑟",
+    "title": "圣骑之力",
+    "hero_type": 1,
+    "type_name": "战士"
+  },
+  {
+    "ename": 170,
+    "name": "刘备",
+    "title": "仁德义枪",
+    "hero_type": 1,
+    "type_name": "战士"
+  },
+  {
+    "ename": 172,
+    "name": "蚩奼",
+    "title": "五兵之主",
+    "hero_type": 1,
+    "type_name": "战士"
+  },
+  {
+    "ename": 178,
+    "name": "杨戬",
+    "title": "根源之目",
+    "hero_type": 1,
+    "type_name": "战士"
+  },
+  {
+    "ename": 180,
+    "name": "哪吒",
+    "title": "桀骜炎枪",
+    "hero_type": 1,
+    "type_name": "战士"
+  },
+  {
+    "ename": 183,
+    "name": "雅典娜",
+    "title": "圣域余晖",
+    "hero_type": 1,
+    "type_name": "战士"
+  },
+  {
+    "ename": 193,
+    "name": "铠",
+    "title": "破灭刃锋",
+    "hero_type": 1,
+    "type_name": "战士"
+  },
+  {
+    "ename": 503,
+    "name": "狂铁",
+    "title": "战车意志",
+    "hero_type": 1,
+    "type_name": "战士"
+  },
+  {
+    "ename": 507,
+    "name": "李信",
+    "title": "谋世之战",
+    "hero_type": 1,
+    "type_name": "战士"
+  },
+  {
+    "ename": 514,
+    "name": "亚连",
+    "title": "追忆之刃",
+    "hero_type": 1,
+    "type_name": "战士"
+  },
+  {
+    "ename": 517,
+    "name": "大司命",
+    "title": "肃归之戈",
+    "hero_type": 1,
+    "type_name": "战士"
+  },
+  {
+    "ename": 518,
+    "name": "马超",
+    "title": "冷晖之枪",
+    "hero_type": 1,
+    "type_name": "战士"
+  },
+  {
+    "ename": 522,
+    "name": "曜",
+    "title": "星辰之子",
+    "hero_type": 1,
+    "type_name": "战士"
+  },
+  {
+    "ename": 529,
+    "name": "盘古",
+    "title": "破晓之神",
+    "hero_type": 1,
+    "type_name": "战士"
+  },
+  {
+    "ename": 536,
+    "name": "夏洛特",
+    "title": "玫瑰剑士",
+    "hero_type": 1,
+    "type_name": "战士"
+  },
+  {
+    "ename": 537,
+    "name": "司空震",
+    "title": "雷霆之王",
+    "hero_type": 1,
+    "type_name": "战士"
+  },
+  {
+    "ename": 538,
+    "name": "云缨",
+    "title": "燎原之心",
+    "hero_type": 1,
+    "type_name": "战士"
+  },
+  {
+    "ename": 544,
+    "name": "赵怀真",
+    "title": "自在之心",
+    "hero_type": 1,
+    "type_name": "战士"
+  },
+  {
+    "ename": 558,
+    "name": "影",
+    "title": "黯羽东君",
+    "hero_type": 1,
+    "type_name": "战士"
+  },
+  {
+    "ename": 563,
+    "name": "海诺",
+    "title": "命运之引",
+    "hero_type": 1,
+    "type_name": "战士"
+  },
+  {
+    "ename": 564,
+    "name": "姬小满",
+    "title": "武道奇才",
+    "hero_type": 1,
+    "type_name": "战士"
+  },
+  {
+    "ename": 106,
+    "name": "小乔",
+    "title": "恋之微风",
+    "hero_type": 2,
+    "type_name": "法师"
+  },
+  {
+    "ename": 108,
+    "name": "墨子",
+    "title": "和平守望",
+    "hero_type": 2,
+    "type_name": "法师"
+  },
+  {
+    "ename": 109,
+    "name": "妲己",
+    "title": "魅力之狐",
+    "hero_type": 2,
+    "type_name": "法师"
+  },
+  {
+    "ename": 110,
+    "name": "嬴政",
+    "title": "王者独尊",
+    "hero_type": 2,
+    "type_name": "法师"
+  },
+  {
+    "ename": 115,
+    "name": "高渐离",
+    "title": "叛逆吟游",
+    "hero_type": 2,
+    "type_name": "法师"
+  },
+  {
+    "ename": 119,
+    "name": "扁鹊",
+    "title": "善恶怪医",
+    "hero_type": 2,
+    "type_name": "法师"
+  },
+  {
+    "ename": 121,
+    "name": "芈月",
+    "title": "永恒之月",
+    "hero_type": 2,
+    "type_name": "法师"
+  },
+  {
+    "ename": 124,
+    "name": "周瑜",
+    "title": "铁血都督",
+    "hero_type": 2,
+    "type_name": "法师"
+  },
+  {
+    "ename": 127,
+    "name": "甄姬",
+    "title": "洛神降临",
+    "hero_type": 2,
+    "type_name": "法师"
+  },
+  {
+    "ename": 136,
+    "name": "武则天",
+    "title": "女帝",
+    "hero_type": 2,
+    "type_name": "法师"
+  },
+  {
+    "ename": 141,
+    "name": "貂蝉",
+    "title": "绝世舞姬",
+    "hero_type": 2,
+    "type_name": "法师"
+  },
+  {
+    "ename": 142,
+    "name": "安琪拉",
+    "title": "暗夜萝莉",
+    "hero_type": 2,
+    "type_name": "法师"
+  },
+  {
+    "ename": 148,
+    "name": "姜子牙",
+    "title": "封神者",
+    "hero_type": 2,
+    "type_name": "法师"
+  },
+  {
+    "ename": 152,
+    "name": "王昭君",
+    "title": "冰雪之华",
+    "hero_type": 2,
+    "type_name": "法师"
+  },
+  {
+    "ename": 156,
+    "name": "张良",
+    "title": "言灵之书",
+    "hero_type": 2,
+    "type_name": "法师"
+  },
+  {
+    "ename": 176,
+    "name": "杨玉环",
+    "title": "霓裳风华",
+    "hero_type": 2,
+    "type_name": "法师"
+  },
+  {
+    "ename": 179,
+    "name": "女娲",
+    "title": "至高创世",
+    "hero_type": 2,
+    "type_name": "法师"
+  },
+  {
+    "ename": 182,
+    "name": "干将莫邪",
+    "title": "淬命双剑",
+    "hero_type": 2,
+    "type_name": "法师"
+  },
+  {
+    "ename": 190,
+    "name": "诸葛亮",
+    "title": "绝代智谋",
+    "hero_type": 2,
+    "type_name": "法师"
+  },
+  {
+    "ename": 197,
+    "name": "弈星",
+    "title": "天元之弈",
+    "hero_type": 2,
+    "type_name": "法师"
+  },
+  {
+    "ename": 312,
+    "name": "沈梦溪",
+    "title": "爆弹怪猫",
+    "hero_type": 2,
+    "type_name": "法师"
+  },
+  {
+    "ename": 504,
+    "name": "米莱狄",
+    "title": "筑城者",
+    "hero_type": 2,
+    "type_name": "法师"
+  },
+  {
+    "ename": 513,
+    "name": "上官婉儿",
+    "title": "惊鸿之笔",
+    "hero_type": 2,
+    "type_name": "法师"
+  },
+  {
+    "ename": 515,
+    "name": "嫦娥",
+    "title": "寒月公主",
+    "hero_type": 2,
+    "type_name": "法师"
+  },
+  {
+    "ename": 521,
+    "name": "海月",
+    "title": "永夜之心",
+    "hero_type": 2,
+    "type_name": "法师"
+  },
+  {
+    "ename": 523,
+    "name": "西施",
+    "title": "幻纱之灵",
+    "hero_type": 2,
+    "type_name": "法师"
+  },
+  {
+    "ename": 540,
+    "name": "金蝉",
+    "title": "渡世行者",
+    "hero_type": 2,
+    "type_name": "法师"
+  },
+  {
+    "ename": 582,
+    "name": "元流之子(法师)",
+    "title": "万妙之心",
+    "hero_type": 2,
+    "type_name": "法师"
+  },
+  {
+    "ename": 105,
+    "name": "廉颇",
+    "title": "正义爆轰",
+    "hero_type": 3,
+    "type_name": "坦克"
+  },
+  {
+    "ename": 120,
+    "name": "白起",
+    "title": "最终兵器",
+    "hero_type": 3,
+    "type_name": "坦克"
+  },
+  {
+    "ename": 126,
+    "name": "夏侯惇",
+    "title": "不羁之风",
+    "hero_type": 3,
+    "type_name": "坦克"
+  },
+  {
+    "ename": 135,
+    "name": "项羽",
+    "title": "霸王",
+    "hero_type": 3,
+    "type_name": "坦克"
+  },
+  {
+    "ename": 144,
+    "name": "程咬金",
+    "title": "热烈之斧",
+    "hero_type": 3,
+    "type_name": "坦克"
+  },
+  {
+    "ename": 149,
+    "name": "刘邦",
+    "title": "双面君主",
+    "hero_type": 3,
+    "type_name": "坦克"
+  },
+  {
+    "ename": 171,
+    "name": "张飞",
+    "title": "禁血狂兽",
+    "hero_type": 3,
+    "type_name": "坦克"
+  },
+  {
+    "ename": 198,
+    "name": "梦奇",
+    "title": "入梦之灵",
+    "hero_type": 3,
+    "type_name": "坦克"
+  },
+  {
+    "ename": 510,
+    "name": "孙策",
+    "title": "光明之海",
+    "hero_type": 3,
+    "type_name": "坦克"
+  },
+  {
+    "ename": 511,
+    "name": "猪八戒",
+    "title": "无忧猛士",
+    "hero_type": 3,
+    "type_name": "坦克"
+  },
+  {
+    "ename": 527,
+    "name": "蒙恬",
+    "title": "秩序统将",
+    "hero_type": 3,
+    "type_name": "坦克"
+  },
+  {
+    "ename": 581,
+    "name": "元流之子(坦克)",
+    "title": "止戈之道",
+    "hero_type": 3,
+    "type_name": "坦克"
+  },
+  {
+    "ename": 116,
+    "name": "阿轲",
+    "title": "信念之刃",
+    "hero_type": 4,
+    "type_name": "刺客"
+  },
+  {
+    "ename": 125,
+    "name": "元歌",
+    "title": "无间傀儡",
+    "hero_type": 4,
+    "type_name": "刺客"
+  },
+  {
+    "ename": 131,
+    "name": "李白",
+    "title": "青莲剑仙",
+    "hero_type": 4,
+    "type_name": "刺客"
+  },
+  {
+    "ename": 137,
+    "name": "司马懿",
+    "title": "寂灭之心",
+    "hero_type": 4,
+    "type_name": "刺客"
+  },
+  {
+    "ename": 146,
+    "name": "露娜",
+    "title": "月光之女",
+    "hero_type": 4,
+    "type_name": "刺客"
+  },
+  {
+    "ename": 150,
+    "name": "韩信",
+    "title": "国士无双",
+    "hero_type": 4,
+    "type_name": "刺客"
+  },
+  {
+    "ename": 153,
+    "name": "兰陵王",
+    "title": "暗影刀锋",
+    "hero_type": 4,
+    "type_name": "刺客"
+  },
+  {
+    "ename": 157,
+    "name": "不知火舞",
+    "title": "明媚烈焰",
+    "hero_type": 4,
+    "type_name": "刺客"
+  },
+  {
+    "ename": 162,
+    "name": "娜可露露",
+    "title": "鹰之守护",
+    "hero_type": 4,
+    "type_name": "刺客"
+  },
+  {
+    "ename": 163,
+    "name": "橘右京",
+    "title": "神梦一刀",
+    "hero_type": 4,
+    "type_name": "刺客"
+  },
+  {
+    "ename": 167,
+    "name": "孙悟空",
+    "title": "齐天大圣",
+    "hero_type": 4,
+    "type_name": "刺客"
+  },
+  {
+    "ename": 195,
+    "name": "百里玄策",
+    "title": "嚣狂之镰",
+    "hero_type": 4,
+    "type_name": "刺客"
+  },
+  {
+    "ename": 502,
+    "name": "裴擒虎",
+    "title": "六合虎拳",
+    "hero_type": 4,
+    "type_name": "刺客"
+  },
+  {
+    "ename": 506,
+    "name": "云中君",
+    "title": "流云之翼",
+    "hero_type": 4,
+    "type_name": "刺客"
+  },
+  {
+    "ename": 528,
+    "name": "澜",
+    "title": "鲨之猎刃",
+    "hero_type": 4,
+    "type_name": "刺客"
+  },
+  {
+    "ename": 531,
+    "name": "镜",
+    "title": "破镜之刃",
+    "hero_type": 4,
+    "type_name": "刺客"
+  },
+  {
+    "ename": 542,
+    "name": "暃",
+    "title": "玉城之子",
+    "hero_type": 4,
+    "type_name": "刺客"
+  },
+  {
+    "ename": 549,
+    "name": "心魔六耳",
+    "title": "孙悟空命格",
+    "hero_type": 4,
+    "type_name": "刺客"
+  },
+  {
+    "ename": 583,
+    "name": "元流之子(刺客)",
+    "title": "守望之诺",
+    "hero_type": 4,
+    "type_name": "刺客"
+  },
+  {
+    "ename": 111,
+    "name": "孙尚香",
+    "title": "千金重弩",
+    "hero_type": 5,
+    "type_name": "射手"
+  },
+  {
+    "ename": 112,
+    "name": "鲁班七号",
+    "title": "机关造物",
+    "hero_type": 5,
+    "type_name": "射手"
+  },
+  {
+    "ename": 132,
+    "name": "马可波罗",
+    "title": "远游之枪",
+    "hero_type": 5,
+    "type_name": "射手"
+  },
+  {
+    "ename": 133,
+    "name": "狄仁杰",
+    "title": "断案大师",
+    "hero_type": 5,
+    "type_name": "射手"
+  },
+  {
+    "ename": 151,
+    "name": "孙权",
+    "title": "定旌之谋",
+    "hero_type": 5,
+    "type_name": "射手"
+  },
+  {
+    "ename": 155,
+    "name": "艾琳",
+    "title": "精灵之舞",
+    "hero_type": 5,
+    "type_name": "射手"
+  },
+  {
+    "ename": 169,
+    "name": "后羿",
+    "title": "半神之弓",
+    "hero_type": 5,
+    "type_name": "射手"
+  },
+  {
+    "ename": 173,
+    "name": "李元芳",
+    "title": "王都密探",
+    "hero_type": 5,
+    "type_name": "射手"
+  },
+  {
+    "ename": 174,
+    "name": "虞姬",
+    "title": "森之风灵",
+    "hero_type": 5,
+    "type_name": "射手"
+  },
+  {
+    "ename": 177,
+    "name": "苍",
+    "title": "苍狼末裔",
+    "hero_type": 5,
+    "type_name": "射手"
+  },
+  {
+    "ename": 192,
+    "name": "黄忠",
+    "title": "燃魂重炮",
+    "hero_type": 5,
+    "type_name": "射手"
+  },
+  {
+    "ename": 196,
+    "name": "百里守约",
+    "title": "静谧之眼",
+    "hero_type": 5,
+    "type_name": "射手"
+  },
+  {
+    "ename": 199,
+    "name": "公孙离",
+    "title": "幻舞玲珑",
+    "hero_type": 5,
+    "type_name": "射手"
+  },
+  {
+    "ename": 508,
+    "name": "伽罗",
+    "title": "破魔之箭",
+    "hero_type": 5,
+    "type_name": "射手"
+  },
+  {
+    "ename": 519,
+    "name": "敖隐",
+    "title": "凌霄真龙",
+    "hero_type": 5,
+    "type_name": "射手"
+  },
+  {
+    "ename": 524,
+    "name": "蒙犽",
+    "title": "烈炮小子",
+    "hero_type": 5,
+    "type_name": "射手"
+  },
+  {
+    "ename": 533,
+    "name": "阿古朵",
+    "title": "山林之子",
+    "hero_type": 5,
+    "type_name": "射手"
+  },
+  {
+    "ename": 545,
+    "name": "莱西奥",
+    "title": "火鹰船长",
+    "hero_type": 5,
+    "type_name": "射手"
+  },
+  {
+    "ename": 547,
+    "name": "卢雅那",
+    "title": "蛇焰使者",
+    "hero_type": 5,
+    "type_name": "射手"
+  },
+  {
+    "ename": 548,
+    "name": "戈娅",
+    "title": "沙海飞舟",
+    "hero_type": 5,
+    "type_name": "射手"
+  },
+  {
+    "ename": 584,
+    "name": "元流之子(射手)",
+    "title": "沉舟之志",
+    "hero_type": 5,
+    "type_name": "射手"
+  },
+  {
+    "ename": 113,
+    "name": "庄周",
+    "title": "逍遥梦幻",
+    "hero_type": 6,
+    "type_name": "辅助"
+  },
+  {
+    "ename": 114,
+    "name": "刘禅",
+    "title": "暴走机关",
+    "hero_type": 6,
+    "type_name": "辅助"
+  },
+  {
+    "ename": 118,
+    "name": "孙膑",
+    "title": "逆流之时",
+    "hero_type": 6,
+    "type_name": "辅助"
+  },
+  {
+    "ename": 159,
+    "name": "朵莉亚",
+    "title": "人鱼之歌",
+    "hero_type": 6,
+    "type_name": "辅助"
+  },
+  {
+    "ename": 168,
+    "name": "牛魔",
+    "title": "精英酋长",
+    "hero_type": 6,
+    "type_name": "辅助"
+  },
+  {
+    "ename": 175,
+    "name": "钟馗",
+    "title": "虚灵城判",
+    "hero_type": 6,
+    "type_name": "辅助"
+  },
+  {
+    "ename": 184,
+    "name": "蔡文姬",
+    "title": "天籁弦音",
+    "hero_type": 6,
+    "type_name": "辅助"
+  },
+  {
+    "ename": 186,
+    "name": "太乙真人",
+    "title": "炼金大师",
+    "hero_type": 6,
+    "type_name": "辅助"
+  },
+  {
+    "ename": 187,
+    "name": "东皇太一",
+    "title": "噬灭日蚀",
+    "hero_type": 6,
+    "type_name": "辅助"
+  },
+  {
+    "ename": 188,
+    "name": "大禹",
+    "title": "鼎镇山河",
+    "hero_type": 6,
+    "type_name": "辅助"
+  },
+  {
+    "ename": 189,
+    "name": "鬼谷子",
+    "title": "万物有灵",
+    "hero_type": 6,
+    "type_name": "辅助"
+  },
+  {
+    "ename": 191,
+    "name": "大乔",
+    "title": "沧海之曜",
+    "hero_type": 6,
+    "type_name": "辅助"
+  },
+  {
+    "ename": 194,
+    "name": "苏烈",
+    "title": "不屈铁壁",
+    "hero_type": 6,
+    "type_name": "辅助"
+  },
+  {
+    "ename": 501,
+    "name": "明世隐",
+    "title": "灵魂劫卜",
+    "hero_type": 6,
+    "type_name": "辅助"
+  },
+  {
+    "ename": 505,
+    "name": "瑶",
+    "title": "鹿灵守心",
+    "hero_type": 6,
+    "type_name": "辅助"
+  },
+  {
+    "ename": 509,
+    "name": "盾山",
+    "title": "无尽之盾",
+    "hero_type": 6,
+    "type_name": "辅助"
+  },
+  {
+    "ename": 525,
+    "name": "鲁班大师",
+    "title": "神匠",
+    "hero_type": 6,
+    "type_name": "辅助"
+  },
+  {
+    "ename": 534,
+    "name": "桑启",
+    "title": "萤火之旅",
+    "hero_type": 6,
+    "type_name": "辅助"
+  },
+  {
+    "ename": 550,
+    "name": "空空儿",
+    "title": "笑面诡手",
+    "hero_type": 6,
+    "type_name": "辅助"
+  },
+  {
+    "ename": 577,
+    "name": "少司缘",
+    "title": "聆愿之祝",
+    "hero_type": 6,
+    "type_name": "辅助"
+  },
+  {
+    "ename": 585,
+    "name": "元流之子(辅助)",
+    "title": "守望之诺",
+    "hero_type": 6,
+    "type_name": "辅助"
+  }
+]

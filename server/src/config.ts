@@ -1,0 +1,23 @@
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
+// 项目根目录（server/src -> server -> 项目根）
+export const PROJECT_ROOT = path.resolve(__dirname, '..', '..');
+export const KNOWLEDGE_DIR = path.join(PROJECT_ROOT, 'data', 'knowledge');
+export const UPLOAD_DIR = path.join(PROJECT_ROOT, 'data', 'uploads');
+export const DB_PATH = path.join(PROJECT_ROOT, 'data', 'db.json');
+
+export const PORT = Number(process.env.PORT || 3000);
+
+/** Agent 运行模式：agent=真Agent / demo=演示模式 / auto=自动检测（默认） */
+export type AgentMode = 'agent' | 'demo' | 'auto';
+export const AGENT_MODE: AgentMode = (process.env.AGENT_MODE as AgentMode) || 'auto';
+
+/** 检测是否存在 CodeBuddy 认证凭据 */
+export function hasCredentials(): boolean {
+  return Boolean(process.env.CODEBUDDY_API_KEY || process.env.CODEBUDDY_AUTH_TOKEN);
+}
+
+export const MODEL = process.env.AGENT_MODEL || '';
