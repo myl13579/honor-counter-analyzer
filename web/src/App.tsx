@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
-import { Button, Message, Input, Tag } from 'tdesign-react';
+import { Button, MessagePlugin, Input, Tag } from 'tdesign-react';
 import { AddIcon, DeleteIcon, SendIcon } from 'tdesign-icons-react';
 import HeroSelector from './components/HeroSelector';
 import ChatPanel from './components/ChatPanel';
@@ -56,7 +56,7 @@ export default function App() {
       setSelected((prev) => {
         if (prev.includes(name)) return prev.filter((n) => n !== name);
         if (prev.length >= 5) {
-          Message.warning('敌方最多选择 5 个英雄');
+          MessagePlugin.warning('敌方最多选择 5 个英雄');
           return prev;
         }
         return [...prev, name];
@@ -140,7 +140,7 @@ export default function App() {
           onMeta: (meta) => {
             if (meta.mode) setMode(meta.mode === 'agent' ? 'agent' : 'demo');
             if (meta.degraded) {
-              Message.info('真 Agent 不可用，已自动切换为演示模式');
+              MessagePlugin.info('真 Agent 不可用，已自动切换为演示模式');
             }
           },
           onDone: () => updateAssistant((m) => ({ ...m, streaming: false })),
@@ -160,7 +160,7 @@ export default function App() {
 
   const analyzeSelected = useCallback(() => {
     if (!selected.length) {
-      Message.warning('请先勾选敌方英雄（1~5 个）');
+      MessagePlugin.warning('请先勾选敌方英雄（1~5 个）');
       return;
     }
     const names = selected.join('、');
@@ -177,19 +177,19 @@ export default function App() {
   const onUpload = useCallback(
     async (file: File) => {
       if (!file.type.startsWith('image/')) {
-        Message.error('请上传图片文件');
+        MessagePlugin.error('请上传图片文件');
         return;
       }
       if (file.size > 5 * 1024 * 1024) {
-        Message.error('图片大小需小于 5MB');
+        MessagePlugin.error('图片大小需小于 5MB');
         return;
       }
       setUploading(true);
       try {
         await uploadImage(file);
-        Message.info('图片已上传。演示模式下暂不支持自动识别，请在面板勾选英雄；认证真 Agent 后可直接读图识别。');
+        MessagePlugin.info('图片已上传。演示模式下暂不支持自动识别，请在面板勾选英雄；认证真 Agent 后可直接读图识别。');
       } catch (e: any) {
-        Message.error(e.message || '上传失败');
+        MessagePlugin.error(e.message || '上传失败');
       } finally {
         setUploading(false);
       }
