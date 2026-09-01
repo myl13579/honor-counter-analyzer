@@ -17,39 +17,64 @@ function reasonFor(counter: Hero | undefined, targetType: string): string {
   for (const [c, t, r] of rules) {
     if (cType === c && targetType === t) return r;
   }
-  // 默认
   return `在定位与机制上形成克制关系（${cType} 对 ${targetType}）`;
 }
 
-/** 生成单个 counter 英雄的「召唤师技能 + 核心出装」描述（查该英雄自身知识库条目） */
-function counterLoadout(name: string): string {
-  const ce = getCounter(name);
-  const summoner = ce?.summoner || '闪现';
-  const build = ce?.build.length ? ce.build.join('、') : '视对局灵活选择';
-  return `召唤师技能 ${summoner}，核心出装 ${build}`;
+/** 克制强度星级（基于定位克制规则，1~5 星） */
+function counterStars(counterType: string, targetType: string): number {
+  const fiveStar: Array<[string, string]> = [
+    ['刺客', '射手'],
+    ['刺客', '法师'],
+  ];
+  const fourStar: Array<[string, string]> = [
+    ['射手', '坦克'],
+    ['法师', '坦克'],
+    ['法师', '射手'],
+    ['坦克', '刺客'],
+    ['辅助', '刺客'],
+  ];
+  if (fiveStar.some(([c, t]) => c === counterType && t === targetType)) return 5;
+  if (fourStar.some(([c, t]) => c === counterType && t === targetType)) return 4;
+  return 3;
+}
+
+/** 星级字符（满星 5） */
+function stars(n: number): string {
+  return '★'.repeat(n) + '☆'.repeat(Math.max(0, 5 - n));
+}
+
+/** 装备名用反引号包裹（供前端渲染为装备卡片） */
+function fmtBuild(ce: CounterEntry | undefined): string {
+  const build = ce?.build?.length ? ce.build : [];
+  return build.length ? build.map((b) => `\`${b}\``).join(' ') : '视对局灵活选择';
 }
 
 /** 单英雄分析文本 */
 function singleHeroAnalysis(entry: CounterEntry): string {
   const heroes = getHeroes();
   const lines: string[] = [];
-  lines.push(`### 敌方英雄：${entry.name}（${entry.type}）`);
+  lines.push(`### 敌方英雄：**${entry.name}**（${entry.type}）`);
   lines.push('');
   if (entry.countered_by.length) {
     // 最推荐 = 克制列表首项（数据生成时按推荐度排序）
     const top = entry.countered_by[0];
     const topEntry = getCounter(top);
     const topHero = heroes.find((h) => h.name === top);
-    lines.push(`**⭐ 最推荐：${top}${topEntry ? `（${topEntry.type}）` : ''}**`);
+    const topType = topEntry?.type || '';
+    lines.push(`**⭐ 最推荐：** **${top}** ${stars(counterStars(topType, entry.type))}`);
     lines.push(`> ${reasonFor(topHero, entry.type)}`);
-    lines.push(`> ${counterLoadout(top)}`);
+    lines.push(`> 召唤师技能 **${topEntry?.summoner || '闪现'}** ｜ 核心出装 ${fmtBuild(topEntry)}`);
     lines.push('');
     const rest = entry.countered_by.slice(1);
     if (rest.length) {
       lines.push('**其余 counter 英雄：**');
       for (const name of rest) {
         const hero = heroes.find((h) => h.name === name);
-        lines.push(`- **${name}**：${reasonFor(hero, entry.type)} ｜ ${counterLoadout(name)}`);
+        const ce = getCounter(name);
+        const cType = ce?.type || '';
+        lines.push(
+          `- **${name}** ${stars(counterStars(cType, entry.type))} ${reasonFor(hero, entry.type)} ｜ 召唤师技能 **${ce?.summoner || '闪现'}** ｜ 出装 ${fmtBuild(ce)}`
+        );
       }
     }
   } else {
@@ -68,24 +93,29 @@ function teamAnalysis(entries: CounterEntry[]): string {
   lines.push('**阵容构成：** ' + entries.map((e) => `${e.name}（${e.type}）`).join('、'));
   lines.push('');
 
-  // 优先 counter 关键位置：先刺客/射手/法师（输出位），再坦克/辅助
+  // 优先 counter 关键位置：先射手/法师/刺客（输出位），再战士/坦克/辅助
   const priority = ['射手', '法师', '刺客', '战士', '坦克', '辅助'];
   const sorted = [...entries].sort((a, b) => priority.indexOf(a.type) - priority.indexOf(b.type));
   lines.push('**整体克制思路：** 优先针对敌方输出位（射手/法师/刺客），再处理前排坦克。');
   lines.push('');
 
   for (const entry of sorted) {
-    lines.push(`#### 针对 ${entry.name}（${entry.type}）`);
+    lines.push(`#### 针对 **${entry.name}**（${entry.type}）`);
     if (entry.countered_by.length) {
       const top = entry.countered_by[0];
       const topEntry = getCounter(top);
       const topHero = heroes.find((h) => h.name === top);
-      lines.push(`- ⭐ 最推荐 **${top}**：${reasonFor(topHero, entry.type)}（${counterLoadout(top)}）`);
+      const topType = topEntry?.type || '';
+      lines.push(
+        `- **⭐ 最推荐：** **${top}** ${stars(counterStars(topType, entry.type))} ${reasonFor(topHero, entry.type)} ｜ 召唤师技能 **${topEntry?.summoner || '闪现'}** ｜ 出装 ${fmtBuild(topEntry)}`
+      );
       const rest = entry.countered_by.slice(1);
-      if (rest.length) {
+      for (const n of rest) {
+        const ce = getCounter(n);
+        const cType = ce?.type || '';
+        const hero = heroes.find((h) => h.name === n);
         lines.push(
-          '- 其余：' +
-            rest.map((n) => `${n}（${counterLoadout(n)}）`).join('、')
+          `- **${n}** ${stars(counterStars(cType, entry.type))} ${reasonFor(hero, entry.type)} ｜ 召唤师技能 **${ce?.summoner || '闪现'}** ｜ 出装 ${fmtBuild(ce)}`
         );
       }
     } else {

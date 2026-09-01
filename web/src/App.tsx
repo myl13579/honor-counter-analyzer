@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useCallback } from 'react';
+import { useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import { Button, MessagePlugin, Input, Tag } from 'tdesign-react';
 import { AddIcon, DeleteIcon, SendIcon } from 'tdesign-icons-react';
 import HeroSelector from './components/HeroSelector';
@@ -19,6 +19,13 @@ export default function App() {
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputFileRef = useRef<HTMLInputElement>(null);
+
+  // 英雄名 -> 英雄信息映射，供分析结果富化渲染（头像/定位标签）
+  const heroMap = useMemo(() => {
+    const m: Record<string, Hero> = {};
+    Object.values(byType).forEach((list) => list.forEach((h) => (m[h.name] = h)));
+    return m;
+  }, [byType]);
 
   // 初始化
   useEffect(() => {
@@ -217,7 +224,7 @@ export default function App() {
 
       <div className="app-body">
         <aside className="sidebar">
-          <div className="side-card">
+          <div className="side-card primary">
             <h3>① 选择敌方英雄</h3>
             <p className="hint">按定位筛选，勾选 1~5 人</p>
             <HeroSelector byType={byType} selected={selected} onToggle={toggleHero} />
@@ -234,7 +241,7 @@ export default function App() {
             </Button>
           </div>
 
-          <div className="side-card">
+          <div className="side-card secondary">
             <h3>② 上传截图识别（可选）</h3>
             <p className="hint">上传选英雄/对局截图，自动识别敌方英雄</p>
             <input
@@ -253,7 +260,7 @@ export default function App() {
             </Button>
           </div>
 
-          <div className="side-card">
+          <div className="side-card secondary">
             <h3>③ 会话历史</h3>
             <div className="session-list">
               {sessions.map((s) => (
@@ -274,9 +281,23 @@ export default function App() {
         </aside>
 
         <main className="main">
+          <div className="chat-titlebar">
+            <div>
+              <div className="chat-title">对局分析</div>
+              <div className="chat-title-sub">
+                {mode === 'agent' ? 'Agent 实时推理' : '本地知识库分析'}
+              </div>
+            </div>
+            <div className="chat-meta">
+              <span className={`mode-badge ${mode}`}>
+                {mode === 'agent' ? 'Agent 推理' : '演示模式'}
+              </span>
+            </div>
+          </div>
           <div className="chat-wrap" ref={scrollRef}>
             <ChatPanel
               messages={messages}
+              heroMap={heroMap}
               empty={
                 <div className="empty-hint">
                   <div className="empty-icon">⚔️</div>
@@ -290,7 +311,7 @@ export default function App() {
             <Input
               value={input}
               onChange={(v) => setInput(v as string)}
-              placeholder="输入自然语言描述，如「对面后羿怎么针对」"
+              placeholder="输入敌方英雄或对局问题，例如：对面后羿加蔡文姬怎么打"
               onEnter={sendFreeText}
               disabled={busy}
             />

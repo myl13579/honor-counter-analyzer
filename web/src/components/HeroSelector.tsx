@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { Tabs, Input } from 'tdesign-react';
+import { Input } from 'tdesign-react';
 import { SearchIcon } from 'tdesign-icons-react';
-import { TYPE_ORDER, TYPE_COLORS, type Hero } from '../types';
+import { TYPE_ORDER, type Hero } from '../types';
+import HeroAvatar from './HeroAvatar';
 
 interface Props {
   byType: Record<string, Hero[]>;
@@ -11,6 +12,7 @@ interface Props {
 
 export default function HeroSelector({ byType, selected, onToggle }: Props) {
   const [keyword, setKeyword] = useState('');
+  const [activeType, setActiveType] = useState(TYPE_ORDER[0]);
   const maxReached = selected.length >= 5;
 
   const kw = keyword.trim().toLowerCase();
@@ -23,29 +25,24 @@ export default function HeroSelector({ byType, selected, onToggle }: Props) {
       )
     : [];
 
-  const renderChip = (h: Hero) => {
+  const renderCard = (h: Hero) => {
     const active = selected.includes(h.name);
     const disabled = !active && maxReached;
-    const color = TYPE_COLORS[h.type_name] || '#999';
     return (
       <div
         key={h.ename}
-        className={`hero-chip ${active ? 'active' : ''} ${disabled ? 'disabled' : ''}`}
-        style={active ? { borderColor: color, color } : undefined}
+        className={`hero-card ${active ? 'active' : ''} ${disabled ? 'disabled' : ''}`}
         onClick={() => {
           if (disabled) return;
           onToggle(h.name);
         }}
         title={h.title ? `${h.name}·${h.title}` : h.name}
       >
-        {h.name}
+        <HeroAvatar ename={h.ename} name={h.name} type={h.type_name} size="sm" />
+        <span className="hero-card-name">{h.name}</span>
+        {active && <span className="hero-check">✓</span>}
       </div>
     );
-  };
-
-  const renderGroup = (type: string) => {
-    const list = byType[type] || [];
-    return <div className="hero-grid">{list.map(renderChip)}</div>;
   };
 
   return (
@@ -61,19 +58,27 @@ export default function HeroSelector({ byType, selected, onToggle }: Props) {
       {kw ? (
         <div className="hero-search-result">
           {matched.length ? (
-            <div className="hero-grid">{matched.map(renderChip)}</div>
+            <div className="hero-grid">{matched.map(renderCard)}</div>
           ) : (
             <div className="search-empty">未找到匹配英雄</div>
           )}
         </div>
       ) : (
-        <Tabs defaultValue={TYPE_ORDER[0]} size="medium">
-          {TYPE_ORDER.map((t) => (
-            <Tabs.TabPanel key={t} value={t} label={`${t}(${(byType[t] || []).length})`}>
-              {renderGroup(t)}
-            </Tabs.TabPanel>
-          ))}
-        </Tabs>
+        <>
+          <div className="type-tabs">
+            {TYPE_ORDER.map((t) => (
+              <button
+                key={t}
+                type="button"
+                className={`type-tab ${activeType === t ? 'active' : ''}`}
+                onClick={() => setActiveType(t)}
+              >
+                {t}
+              </button>
+            ))}
+          </div>
+          <div className="hero-grid">{(byType[activeType] || []).map(renderCard)}</div>
+        </>
       )}
     </div>
   );

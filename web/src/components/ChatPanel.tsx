@@ -1,22 +1,81 @@
 import React from 'react';
 import { Collapse } from 'tdesign-react';
-import type { ChatMessage } from '../types';
+import type { ChatMessage, Hero } from '../types';
+import { TYPE_COLORS } from '../types';
+import HeroAvatar from './HeroAvatar';
 
-/** 轻量 Markdown 渲染（支持标题/粗体/列表/引用，不解析 HTML） */
-function renderInline(text: string): React.ReactNode[] {
+/** 召唤师技能集合（用于识别粗体内容是否为召唤师技能） */
+const SUMMONERS = new Set([
+  '惩击', '闪现', '治疗术', '净化', '终结', '狂暴', '弱化', '疾跑', '干扰', '眩晕', '斩杀',
+]);
+
+/** 富化渲染：识别粗体（英雄名/召唤师技能/最推荐）、反引号装备、星级字符 */
+function renderRich(text: string, heroMap: Record<string, Hero>): React.ReactNode[] {
   const nodes: React.ReactNode[] = [];
   const parts = text.split(/(\*\*[^*]+\*\*)/g);
   parts.forEach((p, i) => {
     if (p.startsWith('**') && p.endsWith('**')) {
-      nodes.push(<strong key={i}>{p.slice(2, -2)}</strong>);
+      nodes.push(...renderBold(p.slice(2, -2), i, heroMap));
     } else if (p) {
-      nodes.push(<span key={i}>{p}</span>);
+      nodes.push(...renderPlain(p, i));
     }
   });
   return nodes;
 }
 
-function Markdown({ text }: { text: string }) {
+/** 粗体内容：英雄名 → 头像；召唤师技能 → 标签；最推荐 → 高亮；其他 → strong */
+function renderBold(inner: string, baseKey: number, heroMap: Record<string, Hero>): React.ReactNode[] {
+  if (inner.includes('最推荐')) {
+    return [<span key={baseKey} className="top-pick">⭐ 最推荐</span>];
+  }
+  const hero = heroMap[inner];
+  if (hero) {
+    return [
+      <span key={baseKey} className="hero-inline">
+        <HeroAvatar ename={hero.ename} name={hero.name} type={hero.type_name} size="sm" />
+        <strong>{hero.name}</strong>
+        <span className="hero-tag" style={{ background: TYPE_COLORS[hero.type_name] }}>
+          {hero.type_name}
+        </span>
+      </span>,
+    ];
+  }
+  if (SUMMONERS.has(inner)) {
+    return [<span key={baseKey} className="summoner-tag">⚡ {inner}</span>];
+  }
+  return [<strong key={baseKey}>{inner}</strong>];
+}
+
+/** 普通文本：反引号 → 装备卡片；★☆ → 星级 */
+function renderPlain(text: string, baseKey: number): React.ReactNode[] {
+  const nodes: React.ReactNode[] = [];
+  const parts = text.split(/(`[^`]+`)/g);
+  parts.forEach((p, i) => {
+    const key = `${baseKey}-${i}`;
+    if (p.startsWith('`') && p.endsWith('`')) {
+      nodes.push(<span key={key} className="equip-card">{p.slice(1, -1)}</span>);
+    } else if (p) {
+      nodes.push(...renderStars(p, key));
+    }
+  });
+  return nodes;
+}
+
+function renderStars(text: string, baseKey: string): React.ReactNode[] {
+  const nodes: React.ReactNode[] = [];
+  const parts = text.split(/([★☆]+)/g);
+  parts.forEach((p, i) => {
+    const key = `${baseKey}-${i}`;
+    if (p && /^[★☆]+$/.test(p)) {
+      nodes.push(<span key={key} className="stars">{p}</span>);
+    } else if (p) {
+      nodes.push(<React.Fragment key={key}>{p}</React.Fragment>);
+    }
+  });
+  return nodes;
+}
+
+function Markdown({ text, heroMap }: { text: string; heroMap: Record<string, Hero> }) {
   const lines = text.split('\n');
   const blocks: React.ReactNode[] = [];
   let listBuf: string[] = [];
@@ -27,7 +86,7 @@ function Markdown({ text }: { text: string }) {
       blocks.push(
         <ul key={`ul-${key++}`}>
           {listBuf.map((li, i) => (
-            <li key={i}>{renderInline(li)}</li>
+            <li key={i}>{renderRich(li, heroMap)}</li>
           ))}
         </ul>
       );
@@ -38,22 +97,20 @@ function Markdown({ text }: { text: string }) {
   for (const line of lines) {
     if (line.startsWith('### ')) {
       flushList();
-      blocks.push(<h4 key={`h-${key++}`}>{renderInline(line.slice(4))}</h4>);
+      blocks.push(<h4 key={`h-${key++}`}>{renderRich(line.slice(4), heroMap)}</h4>);
     } else if (line.startsWith('#### ')) {
       flushList();
-      blocks.push(<h5 key={`h-${key++}`}>{renderInline(line.slice(5))}</h5>);
+      blocks.push(<h5 key={`h-${key++}`}>{renderRich(line.slice(5), heroMap)}</h5>);
     } else if (line.startsWith('> ')) {
       flushList();
-      blocks.push(
-        <blockquote key={`q-${key++}`}>{renderInline(line.slice(2))}</blockquote>
-      );
+      blocks.push(<blockquote key={`q-${key++}`}>{renderRich(line.slice(2), heroMap)}</blockquote>);
     } else if (line.startsWith('- ')) {
       listBuf.push(line.slice(2));
     } else if (line.trim() === '') {
       flushList();
     } else {
       flushList();
-      blocks.push(<p key={`p-${key++}`}>{renderInline(line)}</p>);
+      blocks.push(<p key={`p-${key++}`}>{renderRich(line, heroMap)}</p>);
     }
   }
   flushList();
@@ -61,7 +118,7 @@ function Markdown({ text }: { text: string }) {
   return <div className="markdown">{blocks}</div>;
 }
 
-function MessageBubble({ msg }: { msg: ChatMessage }) {
+function MessageBubble({ msg, heroMap }: { msg: ChatMessage; heroMap: Record<string, Hero> }) {
   if (msg.role === 'user') {
     return (
       <div className="msg-row user">
@@ -88,7 +145,7 @@ function MessageBubble({ msg }: { msg: ChatMessage }) {
           </Collapse>
         )}
         {msg.content ? (
-          <Markdown text={msg.content} />
+          <Markdown text={msg.content} heroMap={heroMap} />
         ) : (
           <span className="streaming-dot">思考中…</span>
         )}
@@ -98,14 +155,22 @@ function MessageBubble({ msg }: { msg: ChatMessage }) {
   );
 }
 
-export default function ChatPanel({ messages, empty }: { messages: ChatMessage[]; empty: React.ReactNode }) {
+export default function ChatPanel({
+  messages,
+  empty,
+  heroMap = {},
+}: {
+  messages: ChatMessage[];
+  empty: React.ReactNode;
+  heroMap?: Record<string, Hero>;
+}) {
   if (!messages.length) {
     return <div className="chat-empty">{empty}</div>;
   }
   return (
     <div className="chat-panel">
       {messages.map((m) => (
-        <MessageBubble key={m.id} msg={m} />
+        <MessageBubble key={m.id} msg={m} heroMap={heroMap} />
       ))}
     </div>
   );
