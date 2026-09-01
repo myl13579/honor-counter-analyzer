@@ -21,6 +21,14 @@ function reasonFor(counter: Hero | undefined, targetType: string): string {
   return `在定位与机制上形成克制关系（${cType} 对 ${targetType}）`;
 }
 
+/** 生成单个 counter 英雄的「召唤师技能 + 核心出装」描述（查该英雄自身知识库条目） */
+function counterLoadout(name: string): string {
+  const ce = getCounter(name);
+  const summoner = ce?.summoner || '闪现';
+  const build = ce?.build.length ? ce.build.join('、') : '视对局灵活选择';
+  return `召唤师技能 ${summoner}，核心出装 ${build}`;
+}
+
 /** 单英雄分析文本 */
 function singleHeroAnalysis(entry: CounterEntry): string {
   const heroes = getHeroes();
@@ -28,24 +36,33 @@ function singleHeroAnalysis(entry: CounterEntry): string {
   lines.push(`### 敌方英雄：${entry.name}（${entry.type}）`);
   lines.push('');
   if (entry.countered_by.length) {
-    lines.push('**推荐 counter 英雄：**');
-    for (const name of entry.countered_by) {
-      const hero = heroes.find((h) => h.name === name);
-      lines.push(`- **${name}**：${reasonFor(hero, entry.type)}`);
+    // 最推荐 = 克制列表首项（数据生成时按推荐度排序）
+    const top = entry.countered_by[0];
+    const topEntry = getCounter(top);
+    const topHero = heroes.find((h) => h.name === top);
+    lines.push(`**⭐ 最推荐：${top}${topEntry ? `（${topEntry.type}）` : ''}**`);
+    lines.push(`> ${reasonFor(topHero, entry.type)}`);
+    lines.push(`> ${counterLoadout(top)}`);
+    lines.push('');
+    const rest = entry.countered_by.slice(1);
+    if (rest.length) {
+      lines.push('**其余 counter 英雄：**');
+      for (const name of rest) {
+        const hero = heroes.find((h) => h.name === name);
+        lines.push(`- **${name}**：${reasonFor(hero, entry.type)} ｜ ${counterLoadout(name)}`);
+      }
     }
   } else {
     lines.push('**该英雄暂无明确克制数据**，建议依据定位通用规律应对（仅供参考）。');
   }
   lines.push('');
-  lines.push(`**推荐召唤师技能：** ${entry.summoner || '闪现'}`);
-  lines.push('');
-  lines.push(`**推荐核心出装：** ${entry.build.length ? entry.build.join('、') : '视对局灵活选择'}`);
   return lines.join('\n');
 }
 
 /** 整队分析文本 */
 function teamAnalysis(entries: CounterEntry[]): string {
   const lines: string[] = [];
+  const heroes = getHeroes();
   lines.push(`### 敌方阵容（${entries.length} 人）`);
   lines.push('');
   lines.push('**阵容构成：** ' + entries.map((e) => `${e.name}（${e.type}）`).join('、'));
@@ -60,11 +77,20 @@ function teamAnalysis(entries: CounterEntry[]): string {
   for (const entry of sorted) {
     lines.push(`#### 针对 ${entry.name}（${entry.type}）`);
     if (entry.countered_by.length) {
-      lines.push('推荐 counter：' + entry.countered_by.join('、'));
+      const top = entry.countered_by[0];
+      const topEntry = getCounter(top);
+      const topHero = heroes.find((h) => h.name === top);
+      lines.push(`- ⭐ 最推荐 **${top}**：${reasonFor(topHero, entry.type)}（${counterLoadout(top)}）`);
+      const rest = entry.countered_by.slice(1);
+      if (rest.length) {
+        lines.push(
+          '- 其余：' +
+            rest.map((n) => `${n}（${counterLoadout(n)}）`).join('、')
+        );
+      }
     } else {
       lines.push('暂无明确克制数据，依据定位通用规律应对（仅供参考）。');
     }
-    lines.push(`召唤师技能：${entry.summoner || '闪现'}；核心出装：${entry.build.length ? entry.build.join('、') : '灵活选择'}`);
     lines.push('');
   }
 
