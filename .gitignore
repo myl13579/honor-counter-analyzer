@@ -12,5 +12,5 @@ data/sessions.db-*
 # vite 临时文件
 *.timestamp-*.mjs
 
-# vite 临时文件
-*.timestamp-*.mjs
+# 本地预览截图（临时验证产物）
+.preview/
