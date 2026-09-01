@@ -14,15 +14,15 @@
 | P0 | SSE 流式对话展示（工具调用可折叠） | ✅ |
 | P1 | 官方数据知识库（132 英雄 / 121 装备 / 11 召唤师技能） | ✅ |
 | P1 | 克制关系知识库（覆盖全部 132 英雄） | ✅ |
-| P1 | 多会话管理（SQLite 持久化） | ✅ |
+| P1 | 多会话管理（JSON 文件持久化） | ✅ |
 | P1 | 图片上传 + 识别入口 | ✅ |
 
 ## 技术栈
 
 - **前端**：React 18 + Vite 5 + TypeScript + TDesign React
-- **后端**：Express 4 + `@tencent-ai/agent-sdk` + multer + better-sqlite3
+- **后端**：Express 4 + `@tencent-ai/agent-sdk` + multer
 - **通信**：REST + SSE 流式
-- **数据**：SQLite（会话） + 本地 JSON/MD（知识库）
+- **数据**：JSON 文件（会话持久化，`data/db.json`） + 本地 JSON/MD（知识库）
 
 ## 快速开始
 
@@ -80,7 +80,7 @@ honor-counter-analyzer/
 │       ├── index.ts        # 入口
 │       ├── config.ts       # 路径/模式配置
 │       ├── knowledge.ts    # 知识库加载与检索
-│       ├── db.ts           # SQLite 会话持久化
+│       ├── db.ts           # JSON 文件会话持久化
 │       ├── agent/          # 系统提示词 + 真 Agent + 演示服务
 │       └── routes/         # /api/chat /api/heroes /api/upload 等
 ├── web/                    # 前端 React + Vite
@@ -102,6 +102,24 @@ honor-counter-analyzer/
 抓取脚本：`python scripts/fetch-data.py`（构建期执行，运行期不依赖外网）。
 
 克制关系知识库 `counters.md` 为人工整理，**克制关系随版本平衡调整，推荐仅供参考**。
+
+## 测试验证记录（T1–T9）
+
+按开发计划第四节测试用例逐项实测，结果如下：
+
+| 编号 | 场景 | 验证方式 | 结果 |
+|---|---|---|---|
+| T1 | 单英雄对位 | `POST /api/chat` 输入「后羿」 | ✅ 输出 counter 英雄 + 召唤师技能 + 出装 + 克制理由 |
+| T2 | 整队分析 | `POST /api/chat` 输入 5 人阵容 | ✅ 输出整体克制思路 + 关键位置优先 counter |
+| T3 | 阵容超限/空阵容 | 前端 `toggleHero` / `analyzeSelected` 拦截 | ✅ 超过 5 人提示「最多 5 个」；空阵容禁用按钮并提示 |
+| T4 | 知识库缺失英雄 | 输入未知英雄「赛文」 | ✅ 返回引导提示，不编造克制数据 |
+| T5 | 冷门英雄/模糊匹配 | 输入「后裔」 | ✅ 模糊匹配命中「后羿」并给出分析 |
+| T6 | 未认证 | `GET /api/auth/status` | ✅ 返回 `authenticated:false`，前端显示「演示模式」徽章 |
+| T7 | 流式中断/会话恢复 | `GET /api/sessions/:id/messages` | ✅ 会话与消息 JSON 持久化，刷新可恢复 |
+| T8 | 图片识别 | 上传 PNG → `/api/upload` | ✅ 落盘成功；演示模式回显引导，真 Agent 可读图识别 |
+| T9 | 图片异常 | 上传 txt / 超大图 | ✅ 前端拦截格式与大小；后端返回 400 与明确错误 |
+
+> 说明：T6/T8 中「真 Agent 推理」与「图片自动识别」需先完成 CodeBuddy 认证（见上文「运行模式」）；未认证时自动降级演示模式，仍可跑通「勾选英雄 → 流式分析」完整闭环。
 
 ## 免责声明
 
