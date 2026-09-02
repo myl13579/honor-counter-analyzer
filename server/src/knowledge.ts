@@ -106,22 +106,36 @@ function levenshtein(a: string, b: string): number {
   return dp[n];
 }
 
+/** 首字 → 英雄列表索引，加速编辑距离兜底（只比较首字相同的候选） */
+let heroIndex: Map<string, Hero[]> | null = null;
+
+function getHeroIndex(): Map<string, Hero[]> {
+  if (heroIndex) return heroIndex;
+  heroIndex = new Map();
+  for (const h of loadHeroes()) {
+    const key = h.name[0];
+    const arr = heroIndex.get(key);
+    if (arr) arr.push(h);
+    else heroIndex.set(key, [h]);
+  }
+  return heroIndex;
+}
+
 /** 容错解析单个英雄名（别名优先 → 精确匹配 → 编辑距离兜底，"后裔" -> "后羿"） */
 export function resolveHero(name: string): Hero | undefined {
   const trimmed = name.trim();
-  const heroes = loadHeroes();
   // 1. 别名归一化 + 精确匹配
   const normalized = HERO_ALIASES[trimmed] ?? trimmed;
-  const exact = heroes.find((h) => h.name === normalized);
+  const exact = loadHeroes().find((h) => h.name === normalized);
   if (exact) return exact;
   // 2. 编辑距离兜底：仅 ≥3 字开放（2 字名误匹配风险高，交由别名表处理）
   const len = normalized.length;
   const maxDist = len >= 4 ? 2 : len >= 3 ? 1 : 0;
   if (maxDist === 0) return undefined;
+  const candidates = getHeroIndex().get(normalized[0]) ?? []; // 首字一致约束
   let best: Hero | undefined;
   let bestDist = Infinity;
-  for (const h of heroes) {
-    if (h.name[0] !== normalized[0]) continue; // 首字一致约束，降低误匹配
+  for (const h of candidates) {
     const d = levenshtein(normalized, h.name);
     if (d <= maxDist && d < bestDist) {
       bestDist = d;
@@ -131,26 +145,30 @@ export function resolveHero(name: string): Hero | undefined {
   return best;
 }
 
-/** 判断文本中是否包含指定英雄名（含错别字容错，复用 resolveHero） */
-function fuzzyContains(text: string, heroName: string): boolean {
-  const len = heroName.length;
-  for (let i = 0; i + len <= text.length; i++) {
-    if (resolveHero(text.slice(i, i + len))?.name === heroName) return true;
-  }
-  return false;
-}
-
 /** 从任意文本中提取命中的英雄名列表（精确匹配 + 同音/形近模糊匹配） */
 export function extractHeroes(text: string): string[] {
   const heroes = loadHeroes();
   const found: string[] = [];
+
+  // 1. 精确匹配（快路径，O(n·L) 子串查找）
   for (const h of heroes) {
-    if (text.includes(h.name)) {
-      found.push(h.name);
-      continue;
-    }
-    if (fuzzyContains(text, h.name)) found.push(h.name);
+    if (text.includes(h.name)) found.push(h.name);
   }
+
+  // 2. 模糊匹配：按英雄名长度去重滑窗，候选子串统一走 resolveHero。
+  //    避免逐英雄嵌套调用 resolveHero 导致的 O(n²·L)；单字英雄无容错空间，跳过。
+  const lengths = new Set(heroes.filter((h) => h.name.length >= 2).map((h) => h.name.length));
+  const seen = new Set<string>();
+  for (const len of lengths) {
+    for (let i = 0; i + len <= text.length; i++) {
+      const sub = text.slice(i, i + len);
+      if (seen.has(sub)) continue;
+      seen.add(sub);
+      const hero = resolveHero(sub);
+      if (hero && !found.includes(hero.name)) found.push(hero.name);
+    }
+  }
+
   return found;
 }
 

@@ -48,9 +48,23 @@ function load(): void {
   }
 }
 
+let persistTimer: NodeJS.Timeout | null = null;
+
+/** 标记写盘（同一事件循环内多次调用合并为一次，避免重复全量序列化） */
 function persist(): void {
+  if (persistTimer) return;
+  persistTimer = setTimeout(() => {
+    persistTimer = null;
+    flush();
+  }, 0);
+}
+
+/** 原子写盘：先写临时文件再 rename，避免进程崩溃时损坏 db.json */
+function flush(): void {
   fs.mkdirSync(path.dirname(DB_PATH), { recursive: true });
-  fs.writeFileSync(DB_PATH, JSON.stringify(db, null, 2), 'utf-8');
+  const tmp = `${DB_PATH}.tmp`;
+  fs.writeFileSync(tmp, JSON.stringify(db, null, 2), 'utf-8');
+  fs.renameSync(tmp, DB_PATH);
 }
 
 load();

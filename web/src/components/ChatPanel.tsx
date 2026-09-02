@@ -75,7 +75,7 @@ function renderStars(text: string, baseKey: string): React.ReactNode[] {
   return nodes;
 }
 
-function Markdown({ text, heroMap }: { text: string; heroMap: Record<string, Hero> }) {
+const Markdown = React.memo(function Markdown({ text, heroMap }: { text: string; heroMap: Record<string, Hero> }) {
   const lines = text.split('\n');
   const blocks: React.ReactNode[] = [];
   let listBuf: string[] = [];
@@ -116,9 +116,9 @@ function Markdown({ text, heroMap }: { text: string; heroMap: Record<string, Her
   flushList();
 
   return <div className="markdown">{blocks}</div>;
-}
+});
 
-function MessageBubble({ msg, heroMap }: { msg: ChatMessage; heroMap: Record<string, Hero> }) {
+const MessageBubble = React.memo(function MessageBubble({ msg, heroMap }: { msg: ChatMessage; heroMap: Record<string, Hero> }) {
   if (msg.role === 'user') {
     return (
       <div className="msg-row user">
@@ -153,7 +153,7 @@ function MessageBubble({ msg, heroMap }: { msg: ChatMessage; heroMap: Record<str
       </div>
     </div>
   );
-}
+});
 
 export default function ChatPanel({
   messages,
