@@ -76,24 +76,80 @@ export function getHeroesByType(): Record<string, Hero[]> {
   return result;
 }
 
-/** 精确/模糊匹配英雄名（"后裔" -> "后羿"） */
+/**
+ * 常见同音/形近错别字与别名 → 正确英雄名。
+ * 2 字英雄名若开放编辑距离（距离 1 = 50% 不同）会带来高误匹配，故用显式映射兜底。
+ */
+const HERO_ALIASES: Record<string, string> = {
+  后裔: '后羿',
+  妲已: '妲己',
+  奕星: '弈星',
+  赢政: '嬴政',
+};
+
+/** 编辑距离（Levenshtein），用于形近字容错 */
+function levenshtein(a: string, b: string): number {
+  const m = a.length;
+  const n = b.length;
+  if (m === 0) return n;
+  if (n === 0) return m;
+  const dp: number[] = Array.from({ length: n + 1 }, (_, j) => j);
+  for (let i = 1; i <= m; i++) {
+    let prev = dp[0];
+    dp[0] = i;
+    for (let j = 1; j <= n; j++) {
+      const tmp = dp[j];
+      dp[j] = Math.min(dp[j] + 1, dp[j - 1] + 1, prev + (a[i - 1] === b[j - 1] ? 0 : 1));
+      prev = tmp;
+    }
+  }
+  return dp[n];
+}
+
+/** 容错解析单个英雄名（别名优先 → 精确匹配 → 编辑距离兜底，"后裔" -> "后羿"） */
 export function resolveHero(name: string): Hero | undefined {
   const trimmed = name.trim();
   const heroes = loadHeroes();
-  // 1. 精确匹配
-  const exact = heroes.find((h) => h.name === trimmed);
+  // 1. 别名归一化 + 精确匹配
+  const normalized = HERO_ALIASES[trimmed] ?? trimmed;
+  const exact = heroes.find((h) => h.name === normalized);
   if (exact) return exact;
-  // 2. 包含匹配
-  const contains = heroes.find((h) => trimmed.includes(h.name) || h.name.includes(trimmed));
-  return contains;
+  // 2. 编辑距离兜底：仅 ≥3 字开放（2 字名误匹配风险高，交由别名表处理）
+  const len = normalized.length;
+  const maxDist = len >= 4 ? 2 : len >= 3 ? 1 : 0;
+  if (maxDist === 0) return undefined;
+  let best: Hero | undefined;
+  let bestDist = Infinity;
+  for (const h of heroes) {
+    if (h.name[0] !== normalized[0]) continue; // 首字一致约束，降低误匹配
+    const d = levenshtein(normalized, h.name);
+    if (d <= maxDist && d < bestDist) {
+      bestDist = d;
+      best = h;
+    }
+  }
+  return best;
 }
 
-/** 从任意文本中提取命中的英雄名列表 */
+/** 判断文本中是否包含指定英雄名（含错别字容错，复用 resolveHero） */
+function fuzzyContains(text: string, heroName: string): boolean {
+  const len = heroName.length;
+  for (let i = 0; i + len <= text.length; i++) {
+    if (resolveHero(text.slice(i, i + len))?.name === heroName) return true;
+  }
+  return false;
+}
+
+/** 从任意文本中提取命中的英雄名列表（精确匹配 + 同音/形近模糊匹配） */
 export function extractHeroes(text: string): string[] {
   const heroes = loadHeroes();
   const found: string[] = [];
   for (const h of heroes) {
-    if (text.includes(h.name)) found.push(h.name);
+    if (text.includes(h.name)) {
+      found.push(h.name);
+      continue;
+    }
+    if (fuzzyContains(text, h.name)) found.push(h.name);
   }
   return found;
 }

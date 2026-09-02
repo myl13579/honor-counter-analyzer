@@ -160,11 +160,61 @@ export function buildAnalysis(message: string): { heroes: string[]; text: string
   return { heroes, text: parts.join('\n') };
 }
 
-/** 将文本切分为流式分块（模拟 SSE 逐段输出） */
+/** 可安全切分的边界字符（在其后断句，避免割裂语义） */
+const BOUNDARY_CHARS = new Set([
+  '\n', ' ', '，', '。', '、', '；', '：', '！', '？', '｜', '（', '）', '(', ')', '「', '」',
+]);
+
+function isBoundary(c: string): boolean {
+  return BOUNDARY_CHARS.has(c);
+}
+
+/**
+ * 在 [start, idealEnd) 内寻找安全的切割点：
+ * 1. 优先回退到最近的标点/空白边界；
+ * 2. 若区间末尾仍处于未闭合的 **（加粗）或 `（反引号）标记内，向后推迟到标记闭合后再切，
+ *    避免流式过程中富元素标记被切断导致前端"露馅"闪烁。
+ */
+function safeBoundary(text: string, start: number, idealEnd: number): number {
+  let end = idealEnd;
+  // 1. 回退到最近的边界字符之后
+  for (let i = idealEnd - 1; i > start; i--) {
+    if (isBoundary(text[i])) {
+      end = i + 1;
+      break;
+    }
+  }
+  // 2. 推迟到未闭合标记闭合之后
+  while (end < text.length) {
+    const seg = text.slice(start, end);
+    const boldOpen = (seg.match(/\*\*/g) || []).length % 2 === 1;
+    const codeOpen = (seg.match(/`/g) || []).length % 2 === 1;
+    if (!boldOpen && !codeOpen) break;
+    if (boldOpen) {
+      const idx = text.indexOf('**', end);
+      if (idx === -1) return text.length;
+      end = idx + 2;
+    } else if (codeOpen) {
+      const idx = text.indexOf('`', end);
+      if (idx === -1) return text.length;
+      end = idx + 1;
+    }
+  }
+  return end;
+}
+
+/** 将文本切分为流式分块（模拟 SSE 逐段输出），按标记边界切分避免切断 ** / 反引号 */
 export function chunkText(text: string, size = 24): string[] {
   const chunks: string[] = [];
-  for (let i = 0; i < text.length; i += size) {
-    chunks.push(text.slice(i, i + size));
+  let start = 0;
+  while (start < text.length) {
+    let end = Math.min(start + size, text.length);
+    if (end < text.length) {
+      end = safeBoundary(text, start, end);
+      if (end <= start) end = start + 1; // 兜底：保证至少前进 1，避免死循环
+    }
+    chunks.push(text.slice(start, end));
+    start = end;
   }
   return chunks;
 }
