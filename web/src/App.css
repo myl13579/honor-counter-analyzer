@@ -792,6 +792,56 @@ body::after {
 }
 
 /* ===== 工具调用折叠 ===== */
+.plan-card {
+  margin-bottom: 10px;
+  padding: 10px 12px;
+  background: rgba(91, 108, 255, 0.08);
+  border: 1px solid rgba(91, 108, 255, 0.2);
+  border-radius: 8px;
+}
+
+.plan-card-title {
+  font-size: 12px;
+  color: #9aa6ff;
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+
+.plan-step {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--text-dim);
+  padding: 3px 0;
+}
+
+.plan-step-index {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(91, 108, 255, 0.2);
+  color: #9aa6ff;
+  border-radius: 50%;
+  font-size: 11px;
+}
+
+.plan-step-goal {
+  flex: 1;
+}
+
+.plan-step-tool {
+  padding: 2px 8px;
+  background: rgba(168, 85, 247, 0.15);
+  color: #c4a6ff;
+  border-radius: 4px;
+  font-size: 11px;
+  flex-shrink: 0;
+}
+
 .tool-collapse {
   margin-bottom: 10px;
 }

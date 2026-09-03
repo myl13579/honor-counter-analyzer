@@ -9,6 +9,18 @@ const SUMMONERS = new Set([
   '惩击', '闪现', '治疗术', '净化', '终结', '狂暴', '弱化', '疾跑', '干扰', '晕眩',
 ]);
 
+/** 工具名 → 中文标签 */
+const TOOL_LABELS: Record<string, string> = {
+  read_knowledge: '读知识库',
+  grep_knowledge: '查知识库',
+  web_search: '联网检索',
+  none: '分析',
+};
+
+function toolLabel(tool: string): string {
+  return TOOL_LABELS[tool] || tool;
+}
+
 /** 富化渲染：识别粗体（英雄名/召唤师技能/最推荐）、反引号装备、星级字符 */
 function renderRich(text: string, heroMap: Record<string, Hero>): React.ReactNode[] {
   const nodes: React.ReactNode[] = [];
@@ -130,6 +142,18 @@ const MessageBubble = React.memo(function MessageBubble({ msg, heroMap }: { msg:
   return (
     <div className="msg-row assistant">
       <div className="bubble assistant-bubble">
+        {msg.plan && msg.plan.length > 0 && (
+          <div className="plan-card">
+            <div className="plan-card-title">分析计划</div>
+            {msg.plan.map((s, i) => (
+              <div key={i} className="plan-step">
+                <span className="plan-step-index">{i + 1}</span>
+                <span className="plan-step-goal">{s.goal}</span>
+                <span className="plan-step-tool">{toolLabel(s.tool)}</span>
+              </div>
+            ))}
+          </div>
+        )}
         {msg.tools && msg.tools.length > 0 && (
           <Collapse className="tool-collapse" borderless>
             <Collapse.Panel header={`🔧 工具调用 ${msg.tools.length} 次`} value="tools">

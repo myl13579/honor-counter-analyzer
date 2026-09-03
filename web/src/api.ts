@@ -47,6 +47,7 @@ export async function uploadImage(file: File): Promise<{ fileId: string; origina
 export interface StreamHandlers {
   onText: (content: string) => void;
   onTool?: (name: string, content: string) => void;
+  onPlan?: (content: string) => void;
   onMeta?: (meta: { mode: string; sessionId?: string; degraded?: boolean; reason?: string }) => void;
   onDone?: (sessionId: string) => void;
   onError?: (message: string) => void;
@@ -81,6 +82,7 @@ export async function streamChat(body: Record<string, unknown>, handlers: Stream
           const data = JSON.parse(payload);
           if (event === 'text') handlers.onText(data.content || '');
           else if (event === 'tool') handlers.onTool?.(data.name || '工具', data.content || '');
+          else if (event === 'plan') handlers.onPlan?.(data.content || '');
           else if (event === 'meta') handlers.onMeta?.(data);
           else if (event === 'done') handlers.onDone?.(data.sessionId || '');
           else if (event === 'error') handlers.onError?.(data.message || '未知错误');

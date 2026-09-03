@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { getHeroesByType, getHeroes } from '../knowledge.js';
 import { listSessions, getMessages, createSession, deleteSession, getSession, updateSessionTitle } from '../db.js';
 import { randomUUID } from 'node:crypto';
-import { hasCredentials, AGENT_MODE } from '../config.js';
+import { hasDeepSeekKey, AGENT_MODE } from '../config.js';
 
 const router = Router();
 
@@ -14,9 +14,9 @@ router.get('/heroes', (_req, res) => {
 /** 认证状态 */
 router.get('/auth/status', (_req, res) => {
   res.json({
-    hasCredentials: hasCredentials(),
+    hasCredentials: hasDeepSeekKey(),
     mode: AGENT_MODE,
-    authenticated: AGENT_MODE === 'demo' ? false : hasCredentials(),
+    authenticated: hasDeepSeekKey() && AGENT_MODE !== 'demo',
   });
 });
 

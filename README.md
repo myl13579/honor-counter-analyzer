@@ -12,8 +12,13 @@
 | P0 | 单英雄对位分析（⭐最推荐 + 其余 counter，每个均附克制理由/召唤师技能/出装） | ✅ |
 | P0 | 整队阵容分析（整体克制思路 + 关键位置优先 counter + 协同建议） | ✅ |
 | P0 | SSE 流式对话展示（工具调用可折叠） | ✅ |
+| P0 | Agent 自主规划循环（LangGraph 规划 → 执行 → 反思 → 汇总，前端展示分析计划卡片） | ✅ |
+| P0 | 浏览器联网检索（知识库无答案时自动调用必应检索并整合输出） | ✅ |
+| P0 | 安全约束（单轮 60s 超时注入「换思路」提示词 + 重试上限 3 次） | ✅ |
 | P1 | 官方数据知识库（132 英雄 / 121 装备 / 11 召唤师技能） | ✅ |
 | P1 | 克制关系知识库（覆盖全部 132 英雄） | ✅ |
+| P1 | 打法思路 / 对线策略知识库（`playstyle.md`，逐步扩充） | ✅ |
+| P1 | 动态出装推荐（根据敌方出装推荐克制出装） | ✅ |
 | P1 | 多会话管理（JSON 文件持久化） | ✅ |
 | P1 | 图片上传 + 识别入口 | ✅ |
 | P1 | 沉浸式 UI（深蓝暗调 + 蓝紫霓虹 + 金色强调；英雄头像/星级/装备卡片富元素渲染） | ✅ |
@@ -28,7 +33,7 @@
 ## 技术栈
 
 - **前端**：React 18 + Vite 5 + TypeScript + TDesign React
-- **后端**：Express 4 + `@tencent-ai/agent-sdk` + multer
+- **后端**：Express 4 + `@langchain/langgraph` + `@langchain/deepseek`（DeepSeek）+ multer
 - **通信**：REST + SSE 流式
 - **数据**：JSON 文件（会话持久化，`data/db.json`） + 本地 JSON/MD（知识库）
 
@@ -45,7 +50,10 @@
 # 1. 安装依赖（根 + server + web 三个 workspace）
 npm install
 
-# 2. 启动前后端（server:3000 + web:5173）
+# 2. 配置 DeepSeek API Key（可选，不配则走演示模式）
+#    在 server/.env 写入：DEEPSEEK_API_KEY=sk-xxx
+
+# 3. 启动前后端（server:3000 + web:5173）
 npm run dev
 ```
 
@@ -55,21 +63,17 @@ npm run dev
 
 | 模式 | 触发条件 | 说明 |
 |---|---|---|
-| **Agent 推理** | 已配置 CodeBuddy 认证 | Agent 通过 SDK 的 Read/Grep 工具读取知识库，自主推理克制关系 |
-| **演示模式** | 未配置认证（默认） | 后端直接检索本地知识库生成分析，保证无认证也能跑通完整闭环 |
+| **Agent 自主规划** | 已配置 `DEEPSEEK_API_KEY` | 基于 LangGraph 的「规划 → 执行 → 反思 → 汇总」闭环，自主拆解步骤、调用知识库工具，知识库无答案时自动联网检索 |
+| **演示模式** | 未配置 Key（默认） | 后端直接检索本地知识库生成分析，保证无 Key 也能跑通完整闭环 |
 
-认证方式（任选其一）：
+认证方式（DeepSeek）：
 
 ```bash
-# 方式一：CLI 登录
-npm i -g @tencent-ai/codebuddy-code
-codebuddy login
-
-# 方式二：环境变量
-export CODEBUDDY_API_KEY="your-key"   # 或 CODEBUDDY_AUTH_TOKEN
+# 在 server/.env 中配置（已加入 .gitignore，不会提交）
+DEEPSEEK_API_KEY="sk-xxx"
 ```
 
-设置后重启后端，右上角徽章会从「演示模式」切换为「Agent 推理」。可用环境变量 `AGENT_MODE=agent|demo|auto` 强制指定模式。
+设置后重启后端，右上角徽章会从「演示模式」切换为「Agent 推理」。可用环境变量 `AGENT_MODE=demo` 强制演示模式。
 
 ## 目录结构
 

@@ -18,12 +18,18 @@ export interface ChatMessage {
   role: 'user' | 'assistant';
   content: string;
   tools?: ToolCall[];
+  plan?: PlanStep[];
   streaming?: boolean;
 }
 
 export interface ToolCall {
   name: string;
   content: string;
+}
+
+export interface PlanStep {
+  goal: string;
+  tool: string;
 }
 
 export const TYPE_ORDER = ['射手', '法师', '刺客', '战士', '坦克', '辅助'];

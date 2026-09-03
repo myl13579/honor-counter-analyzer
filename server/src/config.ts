@@ -20,4 +20,9 @@ export function hasCredentials(): boolean {
   return Boolean(process.env.CODEBUDDY_API_KEY || process.env.CODEBUDDY_AUTH_TOKEN);
 }
 
+/** 是否配置了 DeepSeek API Key（决定是否启用 LangGraph 自主规划循环） */
+export function hasDeepSeekKey(): boolean {
+  return Boolean(process.env.DEEPSEEK_API_KEY);
+}
+
 export const MODEL = process.env.AGENT_MODEL || '';

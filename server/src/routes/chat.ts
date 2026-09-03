@@ -1,8 +1,8 @@
 import { Router, type Request, type Response } from 'express';
 import { randomUUID } from 'node:crypto';
-import { AGENT_MODE, hasCredentials } from '../config.js';
+import { AGENT_MODE, hasDeepSeekKey } from '../config.js';
 import { addMessage, createSession, getSession } from '../db.js';
-import { runAgent, AgentUnavailableError, type AgentEvent } from '../agent/agentService.js';
+import { runGraph } from '../agent/langgraphService.js';
 import { buildAnalysis, chunkText } from '../agent/demoService.js';
 
 const router = Router();
@@ -13,12 +13,7 @@ function sse(res: Response, event: string, data: unknown): void {
 }
 
 router.post('/chat', async (req: Request, res: Response) => {
-  const {
-    message = '',
-    sessionId: _sid,
-    model,
-    permissionMode = 'bypassPermissions',
-  } = req.body ?? {};
+  const { message = '', sessionId: _sid } = req.body ?? {};
 
   if (!message || !String(message).trim()) {
     res.status(400).json({ error: 'message 不能为空' });
@@ -37,8 +32,8 @@ router.post('/chat', async (req: Request, res: Response) => {
   res.setHeader('Connection', 'keep-alive');
   res.flushHeaders?.();
 
-  // 决定运行模式
-  const useAgent = AGENT_MODE === 'agent' || (AGENT_MODE !== 'demo' && hasCredentials());
+  // 决定运行模式：配置了 DeepSeek Key 且未强制 demo 时走 LangGraph 循环
+  const useAgent = hasDeepSeekKey() && AGENT_MODE !== 'demo';
   let mode: 'agent' | 'demo' = useAgent ? 'agent' : 'demo';
   sse(res, 'meta', { mode, sessionId });
 
@@ -48,36 +43,30 @@ router.post('/chat', async (req: Request, res: Response) => {
     sse(res, 'text', { content: text });
   };
 
+  const runDemo = async () => {
+    const { text } = buildAnalysis(String(message));
+    for (const chunk of chunkText(text)) {
+      await new Promise((r) => setTimeout(r, 12));
+      push(chunk);
+    }
+  };
+
   try {
     if (useAgent) {
-      // 真 Agent 模式
-      try {
-        for await (const evt of runAgent({ prompt: message, sessionId, model, permissionMode })) {
-          if (evt.type === 'text' && evt.content) push(evt.content);
-          else if (evt.type === 'tool') sse(res, 'tool', { name: evt.toolName, content: evt.content });
-          else if (evt.type === 'error') sse(res, 'error', { message: evt.message });
-        }
-      } catch (err) {
-        if (err instanceof AgentUnavailableError && AGENT_MODE !== 'agent') {
-          // 自动降级到演示模式
+      // LangGraph 自主规划循环
+      for await (const evt of runGraph(String(message))) {
+        if (evt.type === 'plan' && evt.content) sse(res, 'plan', { content: evt.content });
+        else if (evt.type === 'tool' && evt.content) sse(res, 'tool', { name: evt.name, content: evt.content });
+        else if (evt.type === 'text' && evt.content) push(evt.content);
+        else if (evt.type === 'error') {
+          // LangGraph 出错 → 降级演示模式
           mode = 'demo';
-          sse(res, 'meta', { mode, degraded: true, reason: err.message });
-          const { text } = buildAnalysis(String(message));
-          for (const chunk of chunkText(text)) {
-            await new Promise((r) => setTimeout(r, 12));
-            push(chunk);
-          }
-        } else {
-          sse(res, 'error', { message: String((err as Error).message) });
+          sse(res, 'meta', { mode, degraded: true, reason: evt.message });
+          await runDemo();
         }
       }
     } else {
-      // 演示模式
-      const { text } = buildAnalysis(String(message));
-      for (const chunk of chunkText(text)) {
-        await new Promise((r) => setTimeout(r, 12));
-        push(chunk);
-      }
+      await runDemo();
     }
 
     const full = assistantParts.join('');

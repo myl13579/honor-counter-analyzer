@@ -4,7 +4,7 @@ import { AddIcon, DeleteIcon, SendIcon } from 'tdesign-icons-react';
 import HeroSelector from './components/HeroSelector';
 import ChatPanel from './components/ChatPanel';
 import { getHeroes, getAuthStatus, listSessions, createSession, getMessages, deleteSession, streamChat, uploadImage } from './api';
-import type { Hero, Session, ChatMessage, ToolCall } from './types';
+import type { Hero, Session, ChatMessage, ToolCall, PlanStep } from './types';
 
 export default function App() {
   const [byType, setByType] = useState<Record<string, Hero[]>>({});
@@ -144,6 +144,14 @@ export default function App() {
               ...m,
               tools: [...(m.tools || []), { name, content } as ToolCall],
             })),
+          onPlan: (content) =>
+            updateAssistant((m) => {
+              try {
+                return { ...m, plan: JSON.parse(content) as PlanStep[] };
+              } catch {
+                return m;
+              }
+            }),
           onMeta: (meta) => {
             if (meta.mode) setMode(meta.mode === 'agent' ? 'agent' : 'demo');
             if (meta.degraded) {
