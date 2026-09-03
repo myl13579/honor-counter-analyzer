@@ -1,7 +1,11 @@
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import dotenv from 'dotenv';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
+// 显式加载 server/.env（不依赖运行时 cwd），确保 DEEPSEEK_API_KEY 等环境变量生效
+dotenv.config({ path: path.resolve(__dirname, '..', '.env') });
 
 // 项目根目录（server/src -> server -> 项目根）
 export const PROJECT_ROOT = path.resolve(__dirname, '..', '..');
