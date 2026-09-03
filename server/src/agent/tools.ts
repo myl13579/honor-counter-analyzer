@@ -54,7 +54,7 @@ export const webSearchTool = tool(
   async ({ query }) => {
     const results = await searchProvider.search(query, 5);
     if (!results.length) return '联网检索无结果（网络不可用或未检索到）';
-    return results.map((r) => `标题：${r.title}\n链接：${r.url}\n摘要：${r.snippet}`).join('\n\n');
+    return results.map((r) => `标题：${r.title}\n链接：${r.url}\n摘要：${r.snippet.slice(0, 200)}`).join('\n\n');
   },
   {
     name: 'web_search',

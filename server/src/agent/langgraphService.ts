@@ -52,6 +52,32 @@ const FALLBACK_PLAN: PlanStep[] = [
   { goal: '读取知识库获取详细克制关系与出装', tool: 'read_knowledge' },
 ];
 
+// 缓存 planner / critic / executor 的 LLM 绑定，避免每次节点调用重建 Runnable
+function makePlannerLlm() {
+  return getLlm().withStructuredOutput(PlanSchema);
+}
+function makeCriticLlm() {
+  return getLlm().withStructuredOutput(CriticSchema);
+}
+function makeExecutorLlm() {
+  return getLlm().bindTools([readKnowledgeTool, grepKnowledgeTool, webSearchTool]);
+}
+let plannerLlmCache: ReturnType<typeof makePlannerLlm> | null = null;
+let criticLlmCache: ReturnType<typeof makeCriticLlm> | null = null;
+let executorLlmCache: ReturnType<typeof makeExecutorLlm> | null = null;
+function getPlannerLlm() {
+  if (!plannerLlmCache) plannerLlmCache = makePlannerLlm();
+  return plannerLlmCache;
+}
+function getCriticLlm() {
+  if (!criticLlmCache) criticLlmCache = makeCriticLlm();
+  return criticLlmCache;
+}
+function getExecutorLlm() {
+  if (!executorLlmCache) executorLlmCache = makeExecutorLlm();
+  return executorLlmCache;
+}
+
 const StateAnnotation = Annotation.Root({
   messages: Annotation<BaseMessage[]>({
     reducer: (prev, next) => prev.concat(next),
@@ -90,7 +116,7 @@ async function executeTool(name: string, args: Record<string, unknown>): Promise
 }
 
 async function plannerNode(state: AgentState): Promise<Partial<AgentState>> {
-  const plannerLlm = getLlm().withStructuredOutput(PlanSchema);
+  const plannerLlm = getPlannerLlm();
   try {
     const result = await withTimeout(
       plannerLlm.invoke([new SystemMessage(PLANNER_PROMPT), ...state.messages]),
@@ -108,7 +134,7 @@ async function executorNode(state: AgentState): Promise<Partial<AgentState>> {
   const step = state.plan[state.stepIndex];
   if (!step) return { stepIndex: state.stepIndex + 1 };
 
-  const executorLlm = getLlm().bindTools([readKnowledgeTool, grepKnowledgeTool, webSearchTool]);
+  const executorLlm = getExecutorLlm();
   const prompt = `你正在执行分析步骤 ${state.stepIndex + 1}/${state.plan.length}：${step.goal}\n请用合适的工具获取所需信息；若该步骤无需工具（tool 为 none），直接给出分析结论。`;
 
   try {
@@ -162,7 +188,7 @@ async function criticNode(state: AgentState): Promise<Partial<AgentState>> {
   const prompt = CRITIC_PROMPT.replace('{observations}', obsText);
 
   try {
-    const criticLlm = getLlm().withStructuredOutput(CriticSchema);
+    const criticLlm = getCriticLlm();
     const result = await withTimeout(
       criticLlm.invoke([new SystemMessage(prompt), ...state.messages]),
       TIMEOUT_MS
@@ -205,13 +231,14 @@ async function synthesizerNode(state: AgentState): Promise<Partial<AgentState>> 
 
 function routeAfterCritic(state: AgentState): string {
   if (state.retryCount >= MAX_RETRY) return 'synthesizer';
+  if (state.iterations >= MAX_ITERATIONS) return 'synthesizer';
   if (state.decision === 'finish') return 'synthesizer';
   if (state.decision === 'replan') return 'planner';
   if (state.stepIndex < state.plan.length) return 'executor';
   return 'synthesizer';
 }
 
-function buildGraph() {
+function compileGraph() {
   return new StateGraph(StateAnnotation)
     .addNode('planner', plannerNode)
     .addNode('executor', executorNode)
@@ -229,6 +256,13 @@ function buildGraph() {
     .compile();
 }
 
+// 缓存编译后的 graph，避免每次请求重复 compile
+let graphCache: ReturnType<typeof compileGraph> | null = null;
+function getGraph() {
+  if (!graphCache) graphCache = compileGraph();
+  return graphCache;
+}
+
 export type AgentEvent =
   | { type: 'plan'; content: string }
   | { type: 'tool'; name: string; content: string }
@@ -237,7 +271,7 @@ export type AgentEvent =
   | { type: 'error'; message: string };
 
 export async function* runGraph(prompt: string): AsyncGenerator<AgentEvent> {
-  const graph = buildGraph();
+  const graph = getGraph();
   try {
     const stream = await graph.stream(
       { messages: [new HumanMessage(prompt)] },
@@ -258,6 +292,8 @@ export async function* runGraph(prompt: string): AsyncGenerator<AgentEvent> {
     }
     yield { type: 'done' };
   } catch (e) {
-    yield { type: 'error', message: (e as Error).message };
+    // 脱敏：原始错误只落服务端日志，对外返回通用文案
+    console.error('[agent] runGraph 异常:', e);
+    yield { type: 'error', message: '分析过程中出现异常，请稍后重试' };
   }
 }

@@ -1,6 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import path from 'node:path';
+import rateLimit from 'express-rate-limit';
 import { PORT, UPLOAD_DIR } from './config.js';
 import chatRouter from './routes/chat.js';
 import heroesRouter from './routes/heroes.js';
@@ -25,6 +26,23 @@ app.use(
   })
 );
 app.use(express.json({ limit: '2mb' }));
+
+// 可选 API Key 鉴权：仅当配置了 API_KEY 时启用；未配置则保持本地演示无鉴权
+const API_KEY = process.env.API_KEY;
+app.use('/api', (req, res, next) => {
+  if (!API_KEY || req.headers['x-api-key'] === API_KEY) return next();
+  res.status(401).json({ error: '未授权' });
+});
+
+// 限流：保护 /api/chat 的 LLM 调用，防止滥用消耗 API 配额
+const chatLimiter = rateLimit({
+  windowMs: 60_000,
+  max: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: '请求过于频繁，请稍后重试' },
+});
+app.use('/api/chat', chatLimiter);
 
 // 上传图片静态访问：仅放行图片扩展名 + nosniff/CSP，防止上传文件被当作可执行内容
 app.use(

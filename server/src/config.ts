@@ -19,11 +19,6 @@ export const PORT = Number(process.env.PORT || 3000);
 export type AgentMode = 'agent' | 'demo' | 'auto';
 export const AGENT_MODE: AgentMode = (process.env.AGENT_MODE as AgentMode) || 'auto';
 
-/** 检测是否存在 CodeBuddy 认证凭据 */
-export function hasCredentials(): boolean {
-  return Boolean(process.env.CODEBUDDY_API_KEY || process.env.CODEBUDDY_AUTH_TOKEN);
-}
-
 /** 是否配置了 DeepSeek API Key（决定是否启用 LangGraph 自主规划循环） */
 export function hasDeepSeekKey(): boolean {
   return Boolean(process.env.DEEPSEEK_API_KEY);

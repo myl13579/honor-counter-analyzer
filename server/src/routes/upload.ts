@@ -4,7 +4,7 @@ import path from 'node:path';
 import fs from 'node:fs';
 import { randomUUID } from 'node:crypto';
 import { UPLOAD_DIR } from '../config.js';
-import { AGENT_MODE, hasCredentials } from '../config.js';
+import { AGENT_MODE, hasDeepSeekKey } from '../config.js';
 
 const router = Router();
 
@@ -19,6 +19,11 @@ const MIME_TO_EXT: Record<string, string> = {
   'image/jpeg': '.jpg',
   'image/webp': '.webp',
 };
+
+/** 净化回显文件名：去除控制字符、限制长度，防注入 */
+function sanitizeName(name: string): string {
+  return name.replace(/[\u0000-\u001f\u007f]/g, '').slice(0, 100);
+}
 
 /** 读取文件头 16 字节用于 magic bytes 校验 */
 function readMagicBytes(filePath: string): Buffer {
@@ -85,7 +90,7 @@ router.post('/upload', (req, res) => {
     }
     res.json({
       fileId: req.file.filename,
-      originalName: req.file.originalname,
+      originalName: sanitizeName(req.file.originalname),
       size: req.file.size,
     });
   });
@@ -107,7 +112,7 @@ router.post('/recognize', async (req, res) => {
     return;
   }
 
-  const useAgent = AGENT_MODE === 'agent' || (AGENT_MODE !== 'demo' && hasCredentials());
+  const useAgent = hasDeepSeekKey() && AGENT_MODE !== 'demo';
   if (!useAgent) {
     res.json({
       heroes: [],

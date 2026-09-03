@@ -73,7 +73,8 @@ router.post('/chat', async (req: Request, res: Response) => {
     if (full) addMessage(sessionId, 'assistant', full);
     sse(res, 'done', { sessionId, mode });
   } catch (err) {
-    sse(res, 'error', { message: String((err as Error).message) });
+    console.error('[chat] 异常:', err);
+    sse(res, 'error', { message: '服务暂时不可用，请稍后重试' });
   } finally {
     res.end();
   }
