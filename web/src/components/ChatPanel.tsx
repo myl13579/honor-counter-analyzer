@@ -1,5 +1,4 @@
 import React from 'react';
-import { Collapse } from 'tdesign-react';
 import type { ChatMessage, Hero } from '../types';
 import { TYPE_COLORS } from '../types';
 import HeroAvatar from './HeroAvatar';
@@ -153,20 +152,6 @@ const MessageBubble = React.memo(function MessageBubble({ msg, heroMap }: { msg:
               </div>
             ))}
           </div>
-        )}
-        {msg.tools && msg.tools.length > 0 && (
-          <Collapse className="tool-collapse" borderless>
-            <Collapse.Panel header={`🔧 工具调用 ${msg.tools.length} 次`} value="tools">
-              <div className="tool-list">
-                {msg.tools.map((t, i) => (
-                  <div key={i} className="tool-item">
-                    <span className="tool-name">{t.name}</span>
-                    {t.content && <code className="tool-input">{t.content}</code>}
-                  </div>
-                ))}
-              </div>
-            </Collapse.Panel>
-          </Collapse>
         )}
         {msg.content ? (
           <Markdown text={msg.content} heroMap={heroMap} />

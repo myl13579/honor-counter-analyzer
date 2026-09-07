@@ -4,6 +4,7 @@ import { HumanMessage, SystemMessage, ToolMessage, type BaseMessage } from '@lan
 import { z } from 'zod';
 import { readKnowledgeTool, grepKnowledgeTool, webSearchTool } from './tools.js';
 import { PLANNER_PROMPT, CRITIC_PROMPT, SYNTHESIZER_PROMPT } from './systemPrompt.js';
+import { getHeroes } from '../knowledge.js';
 
 const TIMEOUT_MS = 60_000; // 单轮超时 1 分钟
 const MAX_RETRY = 3; // 最大重试次数
@@ -203,6 +204,43 @@ async function criticNode(state: AgentState): Promise<Partial<AgentState>> {
   }
 }
 
+/** 各位置允许的英雄定位（基于 heroes.json 的 type_name） */
+const POSITION_RULES: Array<{ label: string; allowed: string[] }> = [
+  { label: '辅助位|游走位', allowed: ['辅助', '坦克'] },
+  { label: '对抗路|边路', allowed: ['战士', '坦克'] },
+  { label: '中路', allowed: ['法师'] },
+  { label: '发育路|射手位', allowed: ['射手'] },
+  { label: '打野', allowed: ['刺客', '战士'] },
+];
+
+/**
+ * 后处理位置校验：用 heroes.json 的 type_name 硬校验合成结果里的位置推荐，
+ * 发现错位（如射手/法师被放到辅助位）时追加明确提示，兜底 prompt 软约束的失效。
+ */
+function validatePositions(text: string): string {
+  const nameToType = new Map(getHeroes().map((h) => [h.name, h.type_name]));
+  const warnings: string[] = [];
+
+  for (const pos of POSITION_RULES) {
+    const re = new RegExp(`(?:${pos.label})[：:]\\s*([^\\n]+)`, 'g');
+    let m: RegExpExecArray | null;
+    while ((m = re.exec(text)) !== null) {
+      const names = [...m[1].matchAll(/\*\*([^*]+)\*\*/g)].map((x) => x[1]);
+      for (const name of names) {
+        const type = nameToType.get(name);
+        if (type && !pos.allowed.includes(type)) {
+          warnings.push(`${name}（${type}）应为${pos.allowed.join('/')}类英雄`);
+        }
+      }
+    }
+  }
+
+  if (warnings.length) {
+    return text + `\n\n> ⚠️ 位置校验：检测到以下推荐与阵容位置不符——${warnings.join('；')}，请重新调整阵容。`;
+  }
+  return text;
+}
+
 async function synthesizerNode(state: AgentState): Promise<Partial<AgentState>> {
   if (state.retryCount >= MAX_RETRY) {
     return { finalAnswer: '任务过于复杂，经过多次尝试仍未完成。请简化问题或分步描述（例如只问单个英雄的克制关系或打法）。' };
@@ -220,7 +258,7 @@ async function synthesizerNode(state: AgentState): Promise<Partial<AgentState>> 
       : Array.isArray(content)
         ? content.map((b) => (b as { text?: string }).text || '').join('')
         : '';
-    return { finalAnswer: text };
+    return { finalAnswer: validatePositions(text) };
   } catch (e) {
     if (e instanceof TimeoutError) {
       return { finalAnswer: '分析耗时过长，已终止。请简化问题后重试。' };
