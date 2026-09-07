@@ -152,6 +152,11 @@ export default function App() {
                 return m;
               }
             }),
+          onThought: (node, content) =>
+            updateAssistant((m) => ({
+              ...m,
+              thinking: { ...m.thinking, [node]: (m.thinking?.[node] || '') + content },
+            })),
           onMeta: (meta) => {
             if (meta.mode) setMode(meta.mode === 'agent' ? 'agent' : 'demo');
             if (meta.degraded) {

@@ -304,27 +304,54 @@ function getGraph() {
 export type AgentEvent =
   | { type: 'plan'; content: string }
   | { type: 'tool'; name: string; content: string }
+  | { type: 'thought'; node: string; content: string }
   | { type: 'text'; content: string }
   | { type: 'done' }
   | { type: 'error'; message: string };
 
+/** 从 LLM chunk 的 content 提取纯文本 */
+function extractText(content: unknown): string {
+  if (typeof content === 'string') return content;
+  if (Array.isArray(content)) {
+    return content.map((b) => (b as { text?: string })?.text || '').join('');
+  }
+  return '';
+}
+
 export async function* runGraph(prompt: string): AsyncGenerator<AgentEvent> {
   const graph = getGraph();
   try {
+    // 双模式流式：updates 拿节点完成事件（plan/tool），messages 拿 LLM token 流（思考/答案）
     const stream = await graph.stream(
       { messages: [new HumanMessage(prompt)] },
-      { streamMode: 'updates' }
+      { streamMode: ['updates', 'messages'] }
     );
-    for await (const update of stream) {
-      for (const [nodeName, data] of Object.entries(update as Record<string, Partial<AgentState>>)) {
-        if (nodeName === 'planner' && data.plan?.length) {
-          yield { type: 'plan', content: JSON.stringify(data.plan) };
-        } else if (nodeName === 'executor' && data.observations?.length) {
-          for (const obs of data.observations) {
-            yield { type: 'tool', name: 'executor', content: obs };
+    for await (const chunk of stream as AsyncIterable<[string, unknown]>) {
+      const [mode, data] = chunk;
+
+      if (mode === 'updates') {
+        // data: { nodeName: updateData }
+        for (const [nodeName, update] of Object.entries((data || {}) as Record<string, Partial<AgentState>>)) {
+          if (nodeName === 'planner' && update.plan?.length) {
+            yield { type: 'plan', content: JSON.stringify(update.plan) };
+          } else if (nodeName === 'executor' && update.observations?.length) {
+            for (const obs of update.observations) {
+              yield { type: 'tool', name: 'executor', content: obs };
+            }
           }
-        } else if (nodeName === 'synthesizer' && data.finalAnswer) {
-          yield { type: 'text', content: data.finalAnswer };
+        }
+      } else if (mode === 'messages') {
+        // data: [message, metadata]，节点名在 metadata.langgraph_node
+        const message = (data as [unknown, unknown] | undefined)?.[0] as { content?: unknown; tool_call_chunks?: Array<{ args?: string; name?: string }> } | undefined;
+        const meta = (data as [unknown, unknown] | undefined)?.[1] as { langgraph_node?: string } | undefined;
+        const nodeName = meta?.langgraph_node;
+        const text = extractText(message?.content);
+        if (!nodeName) continue;
+
+        if (nodeName === 'synthesizer' && text) {
+          yield { type: 'text', content: text };
+        } else if ((nodeName === 'planner' || nodeName === 'critic' || nodeName === 'executor') && text) {
+          yield { type: 'thought', node: nodeName, content: text };
         }
       }
     }

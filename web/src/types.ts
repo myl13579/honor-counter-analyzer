@@ -19,6 +19,7 @@ export interface ChatMessage {
   content: string;
   tools?: ToolCall[];
   plan?: PlanStep[];
+  thinking?: Record<string, string>;
   streaming?: boolean;
 }
 

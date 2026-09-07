@@ -20,6 +20,17 @@ function toolLabel(tool: string): string {
   return TOOL_LABELS[tool] || tool;
 }
 
+/** 思考节点名 → 中文标签 */
+const NODE_LABELS: Record<string, string> = {
+  planner: '规划',
+  critic: '评估',
+  executor: '执行',
+};
+
+function nodeLabel(node: string): string {
+  return NODE_LABELS[node] || node;
+}
+
 /** 富化渲染：识别粗体（英雄名/召唤师技能/最推荐）、反引号装备、星级字符 */
 function renderRich(text: string, heroMap: Record<string, Hero>): React.ReactNode[] {
   const nodes: React.ReactNode[] = [];
@@ -152,6 +163,17 @@ const MessageBubble = React.memo(function MessageBubble({ msg, heroMap }: { msg:
               </div>
             ))}
           </div>
+        )}
+        {msg.thinking && Object.keys(msg.thinking).length > 0 && (
+          <details className="thinking-box" open>
+            <summary className="thinking-title">思考过程</summary>
+            {Object.entries(msg.thinking).map(([node, content]) => (
+              <div key={node} className="thinking-item">
+                <span className="thinking-node">{nodeLabel(node)}</span>
+                <div className="thinking-content">{content}</div>
+              </div>
+            ))}
+          </details>
         )}
         {msg.content ? (
           <Markdown text={msg.content} heroMap={heroMap} />

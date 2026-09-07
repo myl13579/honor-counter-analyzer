@@ -842,6 +842,47 @@ body::after {
   flex-shrink: 0;
 }
 
+.thinking-box {
+  margin-bottom: 10px;
+  padding: 8px 12px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border-strong);
+  border-radius: 8px;
+}
+
+.thinking-title {
+  cursor: pointer;
+  font-size: 12px;
+  color: var(--text-dim);
+  user-select: none;
+}
+
+.thinking-item {
+  margin-top: 8px;
+  padding: 8px;
+  background: var(--bg-1);
+  border-radius: 6px;
+}
+
+.thinking-node {
+  display: inline-block;
+  font-size: 11px;
+  padding: 2px 8px;
+  background: rgba(91, 108, 255, 0.2);
+  color: #9aa6ff;
+  border-radius: 4px;
+  margin-bottom: 6px;
+}
+
+.thinking-content {
+  font-size: 11px;
+  color: var(--text-dim);
+  white-space: pre-wrap;
+  word-break: break-all;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
 .tool-collapse {
   margin-bottom: 10px;
 }

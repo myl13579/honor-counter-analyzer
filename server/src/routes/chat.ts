@@ -57,6 +57,7 @@ router.post('/chat', async (req: Request, res: Response) => {
       for await (const evt of runGraph(String(message))) {
         if (evt.type === 'plan' && evt.content) sse(res, 'plan', { content: evt.content });
         else if (evt.type === 'tool' && evt.content) sse(res, 'tool', { name: evt.name, content: evt.content });
+        else if (evt.type === 'thought' && evt.content) sse(res, 'thought', { node: evt.node, content: evt.content });
         else if (evt.type === 'text' && evt.content) push(evt.content);
         else if (evt.type === 'error') {
           // LangGraph 出错 → 降级演示模式
